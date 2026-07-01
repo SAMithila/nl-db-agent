@@ -1,0 +1,452 @@
+[
+    {
+        "id": "E001",
+        "tier": "easy",
+        "route": "SQL",
+        "question": "How many tracks are in our catalog?",
+        "expected_row_count": 1,
+        "expected_columns": null,
+        "expected_value": {
+            "track_count": 3503
+        },
+        "notes": "Simple COUNT on Track table — accept any column name"
+    },
+    {
+        "id": "E002",
+        "tier": "easy",
+        "route": "SQL",
+        "question": "How many artists do we have?",
+        "expected_row_count": 1,
+        "expected_columns": null,
+        "expected_value": {
+            "artist_count": 275
+        },
+        "notes": "Simple COUNT on Artist table"
+    },
+    {
+        "id": "E003",
+        "tier": "easy",
+        "route": "SQL",
+        "question": "How many customers are from the USA?",
+        "expected_row_count": 1,
+        "expected_columns": null,
+        "expected_value": null,
+        "notes": "COUNT with country filter — accept any column name"
+    },
+    {
+        "id": "E004",
+        "tier": "easy",
+        "route": "SQL",
+        "question": "How many albums do we have in our catalog?",
+        "expected_row_count": 1,
+        "expected_columns": null,
+        "expected_value": {
+            "album_count": 347
+        },
+        "notes": "Simple COUNT on Album table"
+    },
+    {
+        "id": "E005",
+        "tier": "easy",
+        "route": "SQL",
+        "question": "How many invoices do we have in total?",
+        "expected_row_count": 1,
+        "expected_columns": null,
+        "expected_value": null,
+        "notes": "Simple COUNT on Invoice table"
+    },
+    {
+        "id": "E006",
+        "tier": "easy",
+        "route": "SQL",
+        "question": "How many different genres are in our catalog?",
+        "expected_row_count": 1,
+        "expected_columns": null,
+        "expected_value": {
+            "genre_count": 25
+        },
+        "notes": "COUNT on Genre table"
+    },
+    {
+        "id": "E007",
+        "tier": "easy",
+        "route": "SQL",
+        "question": "How many playlists do we have?",
+        "expected_row_count": 1,
+        "expected_columns": null,
+        "expected_value": {
+            "playlist_count": 18
+        },
+        "notes": "Simple COUNT on Playlist table"
+    },
+    {
+        "id": "E008",
+        "tier": "easy",
+        "route": "SQL",
+        "question": "How many employees do we have?",
+        "expected_row_count": 1,
+        "expected_columns": null,
+        "expected_value": {
+            "employee_count": 8
+        },
+        "notes": "Simple COUNT on Employee table"
+    },
+    {
+        "id": "M001",
+        "tier": "medium",
+        "route": "SQL",
+        "question": "Who are the top 5 artists by total revenue?",
+        "expected_row_count": 5,
+        "expected_columns": null,
+        "expected_value": null,
+        "notes": "JOIN Artist→Album→Track→InvoiceLine + GROUP BY + ORDER BY — flexible column names"
+    },
+    {
+        "id": "M002",
+        "tier": "medium",
+        "route": "SQL",
+        "question": "What is the total revenue by genre?",
+        "expected_row_count": null,
+        "expected_columns": null,
+        "expected_value": null,
+        "notes": "GROUP BY genre — row count varies based on JOIN type used"
+    },
+    {
+        "id": "M003",
+        "tier": "medium",
+        "route": "SQL",
+        "question": "Which country generates the most revenue?",
+        "expected_row_count": null,
+        "expected_columns": null,
+        "expected_value": null,
+        "notes": "JOIN Customer→Invoice + GROUP BY + LIMIT 1"
+    },
+    {
+        "id": "M004",
+        "tier": "medium",
+        "route": "SQL",
+        "question": "Who are the top 5 customers by total spending?",
+        "expected_row_count": 5,
+        "expected_columns": null,
+        "expected_value": null,
+        "notes": "JOIN Customer→Invoice + GROUP BY + ORDER BY — flexible column names"
+    },
+    {
+        "id": "M005",
+        "tier": "medium",
+        "route": "SQL",
+        "question": "What is the average invoice total?",
+        "expected_row_count": 1,
+        "expected_columns": null,
+        "expected_value": null,
+        "notes": "AVG aggregation — flexible column name"
+    },
+    {
+        "id": "M006",
+        "tier": "medium",
+        "route": "SQL",
+        "question": "How many tracks does each genre have?",
+        "expected_row_count": 25,
+        "expected_columns": null,
+        "expected_value": null,
+        "notes": "JOIN Genre→Track + GROUP BY — 25 genres"
+    },
+    {
+        "id": "M007",
+        "tier": "medium",
+        "route": "SQL",
+        "question": "What is the total revenue by country?",
+        "expected_row_count": null,
+        "expected_columns": null,
+        "expected_value": null,
+        "notes": "JOIN Customer→Invoice + GROUP BY country"
+    },
+    {
+        "id": "M008",
+        "tier": "medium",
+        "route": "SQL",
+        "question": "Which artist has the most albums?",
+        "expected_row_count": 1,
+        "expected_columns": null,
+        "expected_value": null,
+        "notes": "JOIN Artist→Album + GROUP BY + ORDER BY LIMIT 1 — flexible column names"
+    },
+    {
+        "id": "H001",
+        "tier": "hard",
+        "route": "SQL",
+        "question": "Which tracks have never been purchased?",
+        "expected_row_count": null,
+        "expected_columns": null,
+        "expected_value": null,
+        "notes": "LEFT JOIN Track→InvoiceLine with NULL check — flexible column name"
+    },
+    {
+        "id": "H002",
+        "tier": "hard",
+        "route": "SQL",
+        "question": "What is the revenue contribution percentage of each genre?",
+        "expected_row_count": null,
+        "expected_columns": null,
+        "expected_value": null,
+        "notes": "Subquery for total + percentage calculation — row count varies by JOIN"
+    },
+    {
+        "id": "H003",
+        "tier": "hard",
+        "route": "SQL",
+        "question": "Which customers have purchased tracks from more than 5 different genres?",
+        "expected_row_count": null,
+        "expected_columns": null,
+        "expected_value": null,
+        "notes": "Multi-table JOIN + GROUP BY + HAVING — flexible column names"
+    },
+    {
+        "id": "H004",
+        "tier": "hard",
+        "route": "SQL",
+        "question": "What is the average number of tracks per album?",
+        "expected_row_count": 1,
+        "expected_columns": null,
+        "expected_value": null,
+        "notes": "Nested aggregation — flexible column name"
+    },
+    {
+        "id": "H005",
+        "tier": "hard",
+        "route": "SQL",
+        "question": "Which are the top 5 artists appearing in the most playlists?",
+        "expected_row_count": 5,
+        "expected_columns": null,
+        "expected_value": null,
+        "notes": "JOIN Artist→Album→Track→PlaylistTrack + GROUP BY + LIMIT 5"
+    },
+    {
+        "id": "H006",
+        "tier": "hard",
+        "route": "SQL",
+        "question": "What is the month with the highest total revenue across all years?",
+        "expected_row_count": 1,
+        "expected_columns": null,
+        "expected_value": null,
+        "notes": "Date extraction + GROUP BY + ORDER BY LIMIT 1 — flexible column names"
+    },
+    {
+        "id": "R001",
+        "tier": "rag",
+        "route": "RAG",
+        "question": "What was the global recorded music revenue growth rate in 2024?",
+        "expected_row_count": null,
+        "expected_columns": null,
+        "expected_value": null,
+        "expected_sources": [
+            "GMR2025_SOTI.pdf"
+        ],
+        "expected_content_keywords": [
+            "4.8%",
+            "29.6"
+        ],
+        "notes": "GMR 2025 reports 2024 data: +4.8% to $29.6B"
+    },
+    {
+        "id": "R001b",
+        "tier": "rag",
+        "route": "RAG",
+        "question": "What did the IFPI Global Music Report 2026 say about total revenue?",
+        "expected_row_count": null,
+        "expected_columns": null,
+        "expected_value": null,
+        "expected_sources": [
+            "GMR2026_SOTI.pdf"
+        ],
+        "expected_content_keywords": [
+            "6.4%",
+            "31.7"
+        ],
+        "notes": "GMR 2026 reports 2025 data: +6.4% to $31.7B — more specific question"
+    },
+    {
+        "id": "R002",
+        "tier": "rag",
+        "route": "RAG",
+        "question": "Which region is the fastest growing in recorded music?",
+        "expected_row_count": null,
+        "expected_columns": null,
+        "expected_value": null,
+        "expected_sources": [
+            "GMR2026_SOTI.pdf"
+        ],
+        "expected_content_keywords": [
+            "Latin America",
+            "17.1%"
+        ],
+        "notes": "Latin America +17.1% in 2025 per GMR 2026"
+    },
+    {
+        "id": "R003",
+        "tier": "rag",
+        "route": "RAG",
+        "question": "How many paid streaming subscribers are there worldwide?",
+        "expected_row_count": null,
+        "expected_columns": null,
+        "expected_value": null,
+        "expected_sources": [
+            "GMR2026_SOTI.pdf"
+        ],
+        "expected_content_keywords": [
+            "837"
+        ],
+        "notes": "837M paid subscribers per GMR 2026"
+    },
+    {
+        "id": "R004",
+        "tier": "rag",
+        "route": "RAG",
+        "question": "What is Spotify's monthly active user count?",
+        "expected_row_count": null,
+        "expected_columns": null,
+        "expected_value": null,
+        "expected_sources": [
+            "Spotify-20-F-Filing.pdf"
+        ],
+        "expected_content_keywords": [
+            "751 million"
+        ],
+        "notes": "751M MAUs per Spotify 20-F"
+    },
+    {
+        "id": "R005",
+        "tier": "rag",
+        "route": "RAG",
+        "question": "What does the IFPI report say about streaming fraud?",
+        "expected_row_count": null,
+        "expected_columns": null,
+        "expected_value": null,
+        "expected_sources": [
+            "GMR2026_SOTI.pdf"
+        ],
+        "expected_content_keywords": [
+            "streaming fraud",
+            "fake"
+        ],
+        "notes": "Streaming fraud section in GMR 2026"
+    },
+    {
+        "id": "B001",
+        "tier": "both",
+        "route": "BOTH",
+        "question": "How does our Rock genre revenue compare to global industry trends?",
+        "expected_row_count": null,
+        "expected_columns": null,
+        "expected_value": null,
+        "expected_sources": [
+            "GMR2026_SOTI.pdf"
+        ],
+        "expected_sql_tables": [
+            "Genre",
+            "Track",
+            "InvoiceLine"
+        ],
+        "notes": "SQL: Rock $826.65. RAG: global Rock context from IFPI"
+    },
+    {
+        "id": "B002",
+        "tier": "both",
+        "route": "BOTH",
+        "question": "How does our Latin music sales compare to the global Latin market growth?",
+        "expected_row_count": null,
+        "expected_columns": null,
+        "expected_value": null,
+        "expected_sources": [
+            "GMR2026_SOTI.pdf"
+        ],
+        "expected_sql_tables": [
+            "Genre",
+            "Track",
+            "InvoiceLine"
+        ],
+        "notes": "SQL: Latin $382.14. RAG: Latin America +17.1%"
+    },
+    {
+        "id": "B003",
+        "tier": "both",
+        "route": "BOTH",
+        "question": "Which region should we expand to based on our customer data and industry reports?",
+        "expected_row_count": null,
+        "expected_columns": null,
+        "expected_value": null,
+        "expected_sources": [
+            "GMR2026_SOTI.pdf"
+        ],
+        "expected_sql_tables": [
+            "Customer",
+            "Invoice"
+        ],
+        "notes": "SQL: revenue by country. RAG: fastest growing regions"
+    },
+    {
+        "id": "B004",
+        "tier": "both",
+        "route": "BOTH",
+        "question": "Who are our top 3 artists by revenue and how do they compare to global trends?",
+        "expected_row_count": null,
+        "expected_columns": null,
+        "expected_value": null,
+        "expected_sources": [
+            "GMR2026_SOTI.pdf"
+        ],
+        "expected_sql_tables": [
+            "Artist",
+            "Album",
+            "Track",
+            "InvoiceLine"
+        ],
+        "notes": "Replaced Iron Maiden/metal question — more general and answerable"
+    },
+    {
+        "id": "B005",
+        "tier": "both",
+        "route": "BOTH",
+        "question": "How does our catalog size compare to what streaming platforms report?",
+        "expected_row_count": null,
+        "expected_columns": null,
+        "expected_value": null,
+        "expected_sources": [
+            "Spotify-20-F-Filing.pdf"
+        ],
+        "expected_sql_tables": [
+            "Track"
+        ],
+        "notes": "SQL: track count 3503. RAG: Spotify catalog scale from 20-F"
+    },
+    {
+        "id": "C001",
+        "tier": "clarification",
+        "route": "SQL",
+        "question": "What were our best selling tracks recently?",
+        "expected_row_count": null,
+        "expected_columns": null,
+        "expected_value": null,
+        "notes": "Should trigger clarification — ambiguous time and metric"
+    },
+    {
+        "id": "C002",
+        "tier": "clarification",
+        "route": "SQL",
+        "question": "Show me the top performing artists last quarter",
+        "expected_row_count": null,
+        "expected_columns": null,
+        "expected_value": null,
+        "notes": "Should trigger clarification — ambiguous metric and time"
+    },
+    {
+        "id": "C003",
+        "tier": "clarification",
+        "route": "SQL",
+        "question": "Which genres are doing well?",
+        "expected_row_count": null,
+        "expected_columns": null,
+        "expected_value": null,
+        "notes": "Should trigger clarification — vague metric"
+    }
+]

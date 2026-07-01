@@ -27,8 +27,7 @@ from dotenv import load_dotenv
 load_dotenv(Path(__file__).parent.parent / ".env")
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-MODEL  = "gpt-4o"
-
+MODEL = "gpt-4o-mini"  # was "gpt-4o"
 
 # ------------------------------------------------------------------
 # Tool 6A: format_response()

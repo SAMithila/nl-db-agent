@@ -93,25 +93,28 @@ def _get_client():
 
 
 def route_question(question: str) -> dict:
-    """
-    Routes a question to SQL, RAG, or BOTH using GPT-4o.
-
-    Args:
-        question: Natural language question from the user
-
-    Returns:
-        {
-            "route":     "SQL" | "RAG" | "BOTH",
-            "reason":    "explanation",
-            "sql_focus": "what to query in SQL" or None,
-            "rag_focus": "what to search in docs" or None,
+    # Fast path: obvious SQL questions skip LLM router
+    q = question.lower()
+    sql_signals = ["how many", "count", "total", "list all", "show me all", "average"]
+    rag_signals = ["ifpi", "spotify", "report", "industry", "global", "worldwide", "according to"]
+    
+    if any(s in q for s in rag_signals):
+        pass  # needs LLM router
+    elif any(s in q for s in sql_signals) and not any(s in q for s in ["compare", "trend", "industry"]):
+        # Fast SQL route — no LLM call needed
+        return {
+            "route":     Route.SQL,
+            "reason":    "Fast path: clear SQL question",
+            "sql_focus": question,
+            "rag_focus": None,
         }
-    """
+    
+    # Slow path: ambiguous questions need LLM router
     client = _get_client()
 
     try:
         response = client.chat.completions.create(
-            model="gpt-4o",
+            model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": ROUTER_SYSTEM_PROMPT},
                 {"role": "user",   "content": ROUTER_USER_TEMPLATE.format(question=question)},

@@ -1,13 +1,14 @@
 {
-  "timestamp": "2026-04-08T22:07:45.808088",
+  "timestamp": "2026-07-01T22:08:14.738074",
   "summary": {
-    "total_queries": 25,
-    "passed": 24,
-    "failed": 1,
-    "overall_accuracy": 96.0,
+    "total_queries": 8,
+    "passed": 8,
+    "failed": 0,
+    "overall_accuracy": 100.0,
     "retry_rate": 0.0,
-    "avg_latency_ms": 4580,
-    "total_time_s": 114.57
+    "avg_latency_ms": 7498,
+    "total_time_s": 60.0,
+    "hallucination_rate": null
   },
   "by_tier": {
     "easy": {
@@ -16,403 +17,173 @@
       "accuracy": 100.0
     },
     "medium": {
-      "count": 8,
-      "passed": 8,
-      "accuracy": 100.0
+      "count": 0,
+      "passed": 0,
+      "accuracy": 0
     },
     "hard": {
-      "count": 6,
-      "passed": 6,
-      "accuracy": 100.0
+      "count": 0,
+      "passed": 0,
+      "accuracy": 0
+    },
+    "rag": {
+      "count": 0,
+      "passed": 0,
+      "accuracy": 0
+    },
+    "both": {
+      "count": 0,
+      "passed": 0,
+      "accuracy": 0
     },
     "clarification": {
-      "count": 3,
-      "passed": 2,
-      "accuracy": 66.7
+      "count": 0,
+      "passed": 0,
+      "accuracy": 0
     }
+  },
+  "llm_judge": {
+    "enabled": false,
+    "queries_judged": 0,
+    "hallucination_rate": null,
+    "by_route": {}
   },
   "results": [
     {
       "id": "E001",
       "tier": "easy",
-      "question": "How many orders do we have in total?",
-      "elapsed_ms": 7403,
+      "route": "SQL",
+      "question": "How many tracks are in our catalog?",
+      "elapsed_ms": 7130,
       "retry_count": 0,
       "passed": true,
       "failure_reason": null,
       "row_count": 1,
       "columns": [
-        "total_orders"
+        "track_count"
       ],
-      "sql": "SELECT COUNT(o.order_id) AS total_orders FROM orders o LIMIT 100;",
-      "sql_confidence": "high"
+      "sql": "SELECT COUNT(t.TrackId) AS track_count FROM Track t LIMIT 100;",
+      "sql_confidence": "high",
+      "answer": "Our catalog currently contains a total of 3,503 tracks."
     },
     {
       "id": "E002",
       "tier": "easy",
-      "question": "List all product categories",
-      "elapsed_ms": 4730,
+      "route": "SQL",
+      "question": "How many artists do we have?",
+      "elapsed_ms": 9069,
       "retry_count": 0,
       "passed": true,
       "failure_reason": null,
-      "row_count": 8,
+      "row_count": 1,
       "columns": [
-        "category_name"
+        "artist_count"
       ],
-      "sql": "SELECT DISTINCT c.category_name FROM categories c LIMIT 100;",
-      "sql_confidence": "high"
+      "sql": "SELECT COUNT(a.ArtistId) AS artist_count FROM Artist a LIMIT 100;",
+      "sql_confidence": "high",
+      "answer": "We currently have a total of 275 artists in our database."
     },
     {
       "id": "E003",
       "tier": "easy",
-      "question": "How many customers are from the UK?",
-      "elapsed_ms": 4062,
+      "route": "SQL",
+      "question": "How many customers are from the USA?",
+      "elapsed_ms": 6025,
       "retry_count": 0,
       "passed": true,
       "failure_reason": null,
       "row_count": 1,
       "columns": [
-        "uk_customers_count"
+        "customer_count"
       ],
-      "sql": "SELECT COUNT(*) AS uk_customers_count FROM customers c WHERE c.country = 'UK';",
-      "sql_confidence": "high"
+      "sql": "SELECT COUNT(*) AS customer_count FROM Customer c WHERE c.Country = 'USA';",
+      "sql_confidence": "high",
+      "answer": "There are 13 customers from the USA in our database."
     },
     {
       "id": "E004",
       "tier": "easy",
-      "question": "How many products do we sell?",
-      "elapsed_ms": 3711,
+      "route": "SQL",
+      "question": "How many albums do we have in our catalog?",
+      "elapsed_ms": 5415,
       "retry_count": 0,
       "passed": true,
       "failure_reason": null,
       "row_count": 1,
       "columns": [
-        "total_products"
+        "album_count"
       ],
-      "sql": "SELECT COUNT(p.product_id) AS total_products FROM products p LIMIT 100;",
-      "sql_confidence": "high"
+      "sql": "SELECT COUNT(a.AlbumId) AS album_count FROM Album a LIMIT 100;",
+      "sql_confidence": "high",
+      "answer": "Our catalog currently contains a total of 347 albums."
     },
     {
       "id": "E005",
       "tier": "easy",
-      "question": "How many orders were placed in 2024?",
-      "elapsed_ms": 3934,
+      "route": "SQL",
+      "question": "How many invoices do we have in total?",
+      "elapsed_ms": 7661,
       "retry_count": 0,
       "passed": true,
       "failure_reason": null,
       "row_count": 1,
       "columns": [
-        "order_count"
+        "total_invoices"
       ],
-      "sql": "SELECT COUNT(o.order_id) AS order_count FROM orders o WHERE strftime('%Y', o.order_date) = '2024' LIMIT 100;",
-      "sql_confidence": "high"
+      "sql": "SELECT COUNT(i.InvoiceId) AS total_invoices FROM Invoice i LIMIT 100;",
+      "sql_confidence": "high",
+      "answer": "We currently have a total of 412 invoices in our system."
     },
     {
       "id": "E006",
       "tier": "easy",
-      "question": "How many orders have status Shipped?",
-      "elapsed_ms": 3473,
+      "route": "SQL",
+      "question": "How many different genres are in our catalog?",
+      "elapsed_ms": 5624,
       "retry_count": 0,
       "passed": true,
       "failure_reason": null,
       "row_count": 1,
       "columns": [
-        "shipped_orders_count"
+        "genre_count"
       ],
-      "sql": "SELECT COUNT(o.order_id) AS shipped_orders_count FROM orders o WHERE o.status = 'Shipped' LIMIT 100;",
-      "sql_confidence": "high"
+      "sql": "SELECT COUNT(DISTINCT g.GenreId) AS genre_count FROM Genre g LIMIT 100;",
+      "sql_confidence": "high",
+      "answer": "Our catalog contains 25 different genres, each represented by a unique GenreId."
     },
     {
       "id": "E007",
       "tier": "easy",
-      "question": "List all suppliers",
-      "elapsed_ms": 4013,
+      "route": "SQL",
+      "question": "How many playlists do we have?",
+      "elapsed_ms": 14094,
       "retry_count": 0,
       "passed": true,
       "failure_reason": null,
-      "row_count": 8,
+      "row_count": 1,
       "columns": [
-        "supplier_id",
-        "company_name",
-        "contact_name",
-        "country",
-        "city",
-        "phone"
+        "total_playlists"
       ],
-      "sql": "SELECT s.supplier_id, s.company_name, s.contact_name, s.country, s.city, s.phone FROM suppliers s LIMIT 100",
-      "sql_confidence": "high"
+      "sql": "SELECT COUNT(p.PlaylistId) AS total_playlists FROM Playlist p LIMIT 100",
+      "sql_confidence": "high",
+      "answer": "We currently have a total of 18 playlists in our database."
     },
     {
       "id": "E008",
       "tier": "easy",
-      "question": "How many discontinued products are there?",
-      "elapsed_ms": 4627,
+      "route": "SQL",
+      "question": "How many employees do we have?",
+      "elapsed_ms": 4965,
       "retry_count": 0,
       "passed": true,
       "failure_reason": null,
       "row_count": 1,
       "columns": [
-        "discontinued_product_count"
+        "employee_count"
       ],
-      "sql": "SELECT COUNT(*) AS discontinued_product_count FROM products p WHERE p.discontinued = 1;",
-      "sql_confidence": "high"
-    },
-    {
-      "id": "M001",
-      "tier": "medium",
-      "question": "Who are the top 5 customers by total revenue?",
-      "elapsed_ms": 5591,
-      "retry_count": 0,
-      "passed": true,
-      "failure_reason": null,
-      "row_count": 5,
-      "columns": [
-        "customer_id",
-        "company_name",
-        "total_revenue"
-      ],
-      "sql": "SELECT c.customer_id, c.company_name, SUM(orv.revenue) AS total_revenue FROM customers c JOIN order_revenue orv ON c.customer_id = orv.customer_id GROUP BY c.customer_id, c.company_name ORDER BY total_revenue DESC LIMIT 5;",
-      "sql_confidence": "high"
-    },
-    {
-      "id": "M002",
-      "tier": "medium",
-      "question": "What is the total revenue by product category?",
-      "elapsed_ms": 4777,
-      "retry_count": 0,
-      "passed": true,
-      "failure_reason": null,
-      "row_count": 8,
-      "columns": [
-        "category_name",
-        "total_revenue"
-      ],
-      "sql": "SELECT c.category_name, SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS total_revenue FROM order_items oi JOIN products p ON oi.product_id = p.product_id JOIN categories c ON p.category_id = c.category_id GROUP BY c.category_name LIMIT 100;",
-      "sql_confidence": "high"
-    },
-    {
-      "id": "M003",
-      "tier": "medium",
-      "question": "What are the top 5 best selling products by revenue?",
-      "elapsed_ms": 6145,
-      "retry_count": 0,
-      "passed": true,
-      "failure_reason": null,
-      "row_count": 5,
-      "columns": [
-        "product_name",
-        "total_revenue"
-      ],
-      "sql": "SELECT pss.product_name, pss.total_revenue FROM product_sales_summary pss ORDER BY pss.total_revenue DESC LIMIT 5",
-      "sql_confidence": "high"
-    },
-    {
-      "id": "M004",
-      "tier": "medium",
-      "question": "How many orders were placed each month in 2024?",
-      "elapsed_ms": 8407,
-      "retry_count": 0,
-      "passed": true,
-      "failure_reason": null,
-      "row_count": 12,
-      "columns": [
-        "order_month",
-        "order_count"
-      ],
-      "sql": "SELECT strftime('%Y-%m', o.order_date) AS order_month, COUNT(o.order_id) AS order_count FROM orders o WHERE strftime('%Y', o.order_date) = '2024' GROUP BY order_month ORDER BY order_month LIMIT 100;",
-      "sql_confidence": "high"
-    },
-    {
-      "id": "M005",
-      "tier": "medium",
-      "question": "What is the average order value overall?",
-      "elapsed_ms": 4312,
-      "retry_count": 0,
-      "passed": true,
-      "failure_reason": null,
-      "row_count": 1,
-      "columns": [
-        "average_order_value"
-      ],
-      "sql": "SELECT AVG(revenue) AS average_order_value FROM order_revenue;",
-      "sql_confidence": "high"
-    },
-    {
-      "id": "M006",
-      "tier": "medium",
-      "question": "Which product category has the most products?",
-      "elapsed_ms": 5188,
-      "retry_count": 0,
-      "passed": true,
-      "failure_reason": null,
-      "row_count": 1,
-      "columns": [
-        "category_name",
-        "product_count"
-      ],
-      "sql": "SELECT c.category_name, COUNT(p.product_id) AS product_count FROM categories c JOIN products p ON c.category_id = p.category_id GROUP BY c.category_name ORDER BY product_count DESC LIMIT 1;",
-      "sql_confidence": "high"
-    },
-    {
-      "id": "M007",
-      "tier": "medium",
-      "question": "How many orders does each customer have?",
-      "elapsed_ms": 7494,
-      "retry_count": 0,
-      "passed": true,
-      "failure_reason": null,
-      "row_count": 15,
-      "columns": [
-        "customer_id",
-        "company_name",
-        "order_count"
-      ],
-      "sql": "SELECT c.customer_id, c.company_name, COUNT(o.order_id) AS order_count FROM customers c LEFT JOIN orders o ON c.customer_id = o.customer_id GROUP BY c.customer_id, c.company_name LIMIT 100;",
-      "sql_confidence": "high"
-    },
-    {
-      "id": "M008",
-      "tier": "medium",
-      "question": "What percentage of orders were cancelled?",
-      "elapsed_ms": 4080,
-      "retry_count": 0,
-      "passed": true,
-      "failure_reason": null,
-      "row_count": 1,
-      "columns": [
-        "cancelled_percentage"
-      ],
-      "sql": "SELECT (COUNT(o.order_id) FILTER (WHERE o.status = 'Cancelled') * 100.0 / COUNT(o.order_id)) AS cancelled_percentage FROM orders o;",
-      "sql_confidence": "high"
-    },
-    {
-      "id": "H001",
-      "tier": "hard",
-      "question": "Which customers have not placed any orders?",
-      "elapsed_ms": 2385,
-      "retry_count": 0,
-      "passed": true,
-      "failure_reason": null,
-      "row_count": 0,
-      "columns": [
-        "customer_id",
-        "company_name"
-      ],
-      "sql": "SELECT c.customer_id, c.company_name FROM customers c LEFT JOIN orders o ON c.customer_id = o.customer_id WHERE o.order_id IS NULL LIMIT 100;",
-      "sql_confidence": "high"
-    },
-    {
-      "id": "H002",
-      "tier": "hard",
-      "question": "What is the month with the highest total revenue in 2024?",
-      "elapsed_ms": 4776,
-      "retry_count": 0,
-      "passed": true,
-      "failure_reason": null,
-      "row_count": 1,
-      "columns": [
-        "month",
-        "total_revenue"
-      ],
-      "sql": "SELECT strftime('%Y-%m', o.order_date) AS month, SUM(o.revenue) AS total_revenue FROM order_revenue o WHERE strftime('%Y', o.order_date) = '2024' GROUP BY month ORDER BY total_revenue DESC LIMIT 1;",
-      "sql_confidence": "high"
-    },
-    {
-      "id": "H003",
-      "tier": "hard",
-      "question": "Which products have never been ordered?",
-      "elapsed_ms": 1955,
-      "retry_count": 0,
-      "passed": true,
-      "failure_reason": null,
-      "row_count": 0,
-      "columns": [
-        "product_id",
-        "product_name"
-      ],
-      "sql": "SELECT p.product_id, p.product_name FROM products p LEFT JOIN order_items oi ON p.product_id = oi.product_id WHERE oi.product_id IS NULL LIMIT 100",
-      "sql_confidence": "high"
-    },
-    {
-      "id": "H004",
-      "tier": "hard",
-      "question": "What is the revenue contribution percentage of each category?",
-      "elapsed_ms": 6309,
-      "retry_count": 0,
-      "passed": true,
-      "failure_reason": null,
-      "row_count": 8,
-      "columns": [
-        "category_name",
-        "category_revenue",
-        "revenue_percentage"
-      ],
-      "sql": "SELECT c.category_name, SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS category_revenue, (SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) / (SELECT SUM(oi2.unit_price * oi2.quantity * (1 - oi2.discount)) FROM order_items oi2)) * 100 AS revenue_percentage FROM order_items oi JOIN products p ON oi.product_id = p.product_id JOIN categories c ON p.category_id = c.category_id GROUP BY c.category_name LIMIT 100;",
-      "sql_confidence": "high"
-    },
-    {
-      "id": "H005",
-      "tier": "hard",
-      "question": "Which customers placed orders in both 2023 and 2024?",
-      "elapsed_ms": 4916,
-      "retry_count": 0,
-      "passed": true,
-      "failure_reason": null,
-      "row_count": 15,
-      "columns": [
-        "customer_id",
-        "company_name"
-      ],
-      "sql": "SELECT DISTINCT c.customer_id, c.company_name FROM customers c JOIN orders o ON c.customer_id = o.customer_id WHERE strftime('%Y', o.order_date) = '2023' AND c.customer_id IN (SELECT o2.customer_id FROM orders o2 WHERE strftime('%Y', o2.order_date) = '2024') LIMIT 100;",
-      "sql_confidence": "high"
-    },
-    {
-      "id": "H006",
-      "tier": "hard",
-      "question": "What is the average number of items per order?",
-      "elapsed_ms": 3813,
-      "retry_count": 0,
-      "passed": true,
-      "failure_reason": null,
-      "row_count": 1,
-      "columns": [
-        "average_items_per_order"
-      ],
-      "sql": "SELECT AVG(item_count) AS average_items_per_order FROM (SELECT o.order_id, SUM(oi.quantity) AS item_count FROM orders o JOIN order_items oi ON o.order_id = oi.order_id GROUP BY o.order_id) subquery;",
-      "sql_confidence": "high"
-    },
-    {
-      "id": "C001",
-      "tier": "clarification",
-      "question": "What were our best selling products recently?",
-      "elapsed_ms": 1908,
-      "retry_count": 0,
-      "expected": "clarification_triggered",
-      "clarification_triggered": true,
-      "passed": true,
-      "failure_reason": null
-    },
-    {
-      "id": "C002",
-      "tier": "clarification",
-      "question": "Show me the top performing employees last quarter",
-      "elapsed_ms": 1977,
-      "retry_count": 0,
-      "expected": "clarification_triggered",
-      "clarification_triggered": true,
-      "passed": true,
-      "failure_reason": null
-    },
-    {
-      "id": "C003",
-      "tier": "clarification",
-      "question": "Which products are doing well?",
-      "elapsed_ms": 4525,
-      "retry_count": 0,
-      "expected": "clarification_triggered",
-      "clarification_triggered": false,
-      "passed": false,
-      "failure_reason": "No clarification triggered"
+      "sql": "SELECT COUNT(e.EmployeeId) AS employee_count FROM Employee e;",
+      "sql_confidence": "high",
+      "answer": "We currently have a total of 8 employees in our organization."
     }
   ]
 }
