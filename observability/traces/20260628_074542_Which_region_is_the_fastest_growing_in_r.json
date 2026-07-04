@@ -1,0 +1,81 @@
+{
+  "metadata": {
+    "timestamp": "2026-06-28T07:45:42.481000",
+    "question": "Which region is the fastest growing in recorded music?",
+    "user_id": "alice",
+    "success": false,
+    "had_error": false,
+    "retry_count": 0
+  },
+  "pipeline": {
+    "clarification_needed": false,
+    "schema_tables": [],
+    "generated_sql": null,
+    "sql_confidence": "",
+    "sql_explanation": "",
+    "sql_assumptions": "",
+    "validation_passed": false,
+    "guardrails_passed": false,
+    "execution_success": false
+  },
+  "validation": null,
+  "guardrails": {
+    "permissions": null,
+    "limits": null,
+    "safety": null
+  },
+  "execution": {
+    "row_count": 0,
+    "execution_ms": 0,
+    "truncated": false,
+    "columns": []
+  },
+  "response": {
+    "summary": "The fastest growing region in recorded music for 2024 was the Middle East & North Africa (MENA), with a growth rate of 22.8% (Source 1: IFPI Global Music Report 2025, p.6). For 2025, Latin America was the fastest growing region, with a growth rate of 17.1% (Source 5: IFPI Global Music Report 2026, p.15).",
+    "key_insights": [
+      "Source: IFPI Global Music Report 2025 (IFPI, 2025)",
+      "Source: IFPI Global Music Report 2026 (IFPI, 2026)"
+    ]
+  },
+  "error": {
+    "message": null,
+    "stage": null
+  },
+  "trace": [
+    {
+      "node": "clarify",
+      "message": "Checking question: 'Which region is the fastest growing in recorded music?'",
+      "timestamp": 1782611137.837
+    },
+    {
+      "node": "clarify",
+      "message": "Question is clear \u2014 proceeding",
+      "timestamp": 1782611137.837
+    },
+    {
+      "node": "router",
+      "message": "Routing question: 'Which region is the fastest growing in recorded music?'",
+      "timestamp": 1782611137.838
+    },
+    {
+      "node": "router",
+      "message": "Route: RAG \u2014 The question asks about industry knowledge and regional growth trends, which are not in the Chinook database.",
+      "timestamp": 1782611138.8
+    },
+    {
+      "node": "rag",
+      "message": "Searching documents: 'IFPI Global Music Report 2025 & 2026 for regional growth trends in recorded music.'",
+      "timestamp": 1782611138.802
+    },
+    {
+      "node": "rag",
+      "message": "Retrieved 5 chunks from: ['IFPI Global Music Report 2025', 'IFPI Global Music Report 2026']",
+      "timestamp": 1782611139.927
+    },
+    {
+      "node": "format",
+      "message": "Formatting response (route=RAG)",
+      "timestamp": 1782611139.929
+    }
+  ]
+}

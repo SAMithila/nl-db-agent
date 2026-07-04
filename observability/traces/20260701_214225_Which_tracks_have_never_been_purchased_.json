@@ -1,0 +1,194 @@
+{
+  "metadata": {
+    "timestamp": "2026-07-01T21:42:25.578629",
+    "question": "Which tracks have never been purchased?",
+    "user_id": "alice",
+    "success": true,
+    "had_error": false,
+    "retry_count": 0
+  },
+  "pipeline": {
+    "clarification_needed": false,
+    "schema_tables": [
+      "Invoice",
+      "Track"
+    ],
+    "generated_sql": "SELECT t.TrackId, t.Name FROM Track t WHERE t.TrackId NOT IN (SELECT ii.TrackId FROM InvoiceLine ii);",
+    "sql_confidence": "high",
+    "sql_explanation": "This query selects the TrackId and Name of tracks from the Track table that do not appear in any InvoiceLine, indicating they have never been purchased.",
+    "sql_assumptions": "Assumes that the absence of a TrackId in the InvoiceLine table means the track has never been purchased.",
+    "validation_passed": true,
+    "guardrails_passed": true,
+    "execution_success": true
+  },
+  "validation": {
+    "valid": true,
+    "checks": {
+      "safety": {
+        "passed": true,
+        "details": "All safety checks passed"
+      },
+      "syntax": {
+        "passed": true,
+        "details": "Syntax is valid"
+      },
+      "complexity": {
+        "passed": true,
+        "score": 3,
+        "tier": "simple",
+        "details": "Complexity score: 3/10 (simple)"
+      }
+    },
+    "error": null
+  },
+  "guardrails": {
+    "permissions": {
+      "allowed": true,
+      "user_id": "alice",
+      "role": "analyst",
+      "tables_in_query": [
+        "InvoiceLine",
+        "Track"
+      ],
+      "denied_tables": [],
+      "reason": "Access granted"
+    },
+    "limits": {
+      "allowed": true,
+      "checks": {
+        "query_length": {
+          "passed": true,
+          "details": "101 chars (limit: 5000)"
+        },
+        "rate_limit": {
+          "passed": true,
+          "details": "16 queries in last hour (34 remaining)",
+          "remaining": 34
+        },
+        "row_limit": {
+          "passed": true,
+          "details": "No LIMIT clause \u2014 executor will cap at 100 rows"
+        }
+      },
+      "reason": "All limits passed"
+    },
+    "safety": {
+      "safe": true,
+      "checks": {
+        "injection": {
+          "passed": true,
+          "threat": null,
+          "details": "No injection patterns detected"
+        },
+        "exfiltration": {
+          "passed": true,
+          "threat": null,
+          "details": "No exfiltration patterns detected"
+        }
+      },
+      "reason": "Safe to execute"
+    }
+  },
+  "execution": {
+    "row_count": 100,
+    "execution_ms": 2,
+    "truncated": true,
+    "columns": [
+      "TrackId",
+      "Name"
+    ]
+  },
+  "response": {
+    "summary": "There are at least 100 tracks that have never been purchased, including 'Let's Get It Up' (TrackId 7) and 'Crazy' (TrackId 34).",
+    "key_insights": [
+      "The list includes a variety of tracks from different artists, such as 'C.O.D.' (TrackId 11) and 'Dude (Looks Like A Lady)' (TrackId 27).",
+      "Popular tracks like 'Let There Be Rock' (TrackId 17) and 'Whole Lotta Rosie' (TrackId 22) are also among those never purchased."
+    ]
+  },
+  "error": {
+    "message": null,
+    "stage": null
+  },
+  "trace": [
+    {
+      "node": "clarify",
+      "message": "Checking question: 'Which tracks have never been purchased?'",
+      "timestamp": 1782920536.174
+    },
+    {
+      "node": "clarify",
+      "message": "Question is clear \u2014 proceeding",
+      "timestamp": 1782920536.174
+    },
+    {
+      "node": "router",
+      "message": "Routing question: 'Which tracks have never been purchased?'",
+      "timestamp": 1782920536.174
+    },
+    {
+      "node": "router",
+      "message": "Route: SQL \u2014 The question asks for specific data about tracks in the Chinook database, specifically those that have never been purchased.",
+      "timestamp": 1782920537.554
+    },
+    {
+      "node": "schema",
+      "message": "Retrieving relevant schema",
+      "timestamp": 1782920537.556
+    },
+    {
+      "node": "schema",
+      "message": "Found relevant tables: ['Invoice', 'Track']",
+      "timestamp": 1782920537.568
+    },
+    {
+      "node": "generate",
+      "message": "Generating SQL (attempt 1)",
+      "timestamp": 1782920537.569
+    },
+    {
+      "node": "generate",
+      "message": "SQL generated (confidence: high)",
+      "timestamp": 1782920540.219
+    },
+    {
+      "node": "validate",
+      "message": "Validating SQL",
+      "timestamp": 1782920540.22
+    },
+    {
+      "node": "validate",
+      "message": "Valid \u2014 complexity: 3/10 (simple)",
+      "timestamp": 1782920540.221
+    },
+    {
+      "node": "guardrails",
+      "message": "Running guardrail checks",
+      "timestamp": 1782920540.222
+    },
+    {
+      "node": "guardrails",
+      "message": "All guardrails passed \u2713",
+      "timestamp": 1782920540.225
+    },
+    {
+      "node": "execute",
+      "message": "Executing query",
+      "timestamp": 1782920540.226
+    },
+    {
+      "node": "execute",
+      "message": "Success \u2014 100 rows in 2ms",
+      "timestamp": 1782920540.228
+    },
+    {
+      "node": "format",
+      "message": "Formatting response (route=SQL)",
+      "timestamp": 1782920540.229
+    },
+    {
+      "node": "format",
+      "message": "Response formatted successfully",
+      "timestamp": 1782920543.091
+    }
+  ]
+}

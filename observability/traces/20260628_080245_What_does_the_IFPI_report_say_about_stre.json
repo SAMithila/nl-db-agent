@@ -1,0 +1,81 @@
+{
+  "metadata": {
+    "timestamp": "2026-06-28T08:02:45.732437",
+    "question": "What does the IFPI report say about streaming fraud?",
+    "user_id": "alice",
+    "success": false,
+    "had_error": false,
+    "retry_count": 0
+  },
+  "pipeline": {
+    "clarification_needed": false,
+    "schema_tables": [],
+    "generated_sql": null,
+    "sql_confidence": "",
+    "sql_explanation": "",
+    "sql_assumptions": "",
+    "validation_passed": false,
+    "guardrails_passed": false,
+    "execution_success": false
+  },
+  "validation": null,
+  "guardrails": {
+    "permissions": null,
+    "limits": null,
+    "safety": null
+  },
+  "execution": {
+    "row_count": 0,
+    "execution_ms": 0,
+    "truncated": false,
+    "columns": []
+  },
+  "response": {
+    "summary": "The IFPI Global Music Report 2026 highlights streaming fraud as a significant threat to the music industry, describing it as a new form of piracy. The report notes that 85% of all streams on AI-generated music were fraudulent in 2025, an increase from 70% the previous year. It emphasizes the need for the entire music community to come together to combat this issue effectively. The report also mentions that streaming fraud involves the artificial generation of plays for manipulated or fake content, which diverts revenue away from legitimate creators. IFPI and its member companies are actively taking legal action against those enabling and profiting from streaming fraud, leading to the disruption and shutdown of manipulation services in multiple territories (Source 1, Source 2, Source 4, Source 5).",
+    "key_insights": [
+      "Source: IFPI Global Music Report 2026 (IFPI, 2026)",
+      "Source: IFPI Global Music Report 2025 (IFPI, 2025)"
+    ]
+  },
+  "error": {
+    "message": null,
+    "stage": null
+  },
+  "trace": [
+    {
+      "node": "clarify",
+      "message": "Checking question: 'What does the IFPI report say about streaming fraud?'",
+      "timestamp": 1782612160.995
+    },
+    {
+      "node": "clarify",
+      "message": "Question is clear \u2014 proceeding",
+      "timestamp": 1782612160.995
+    },
+    {
+      "node": "router",
+      "message": "Routing question: 'What does the IFPI report say about streaming fraud?'",
+      "timestamp": 1782612160.996
+    },
+    {
+      "node": "router",
+      "message": "Route: RAG \u2014 The question asks for information from the IFPI report, which is an external document.",
+      "timestamp": 1782612161.959
+    },
+    {
+      "node": "rag",
+      "message": "Searching documents: 'IFPI Global Music Report 2025 & 2026 for information on streaming fraud.'",
+      "timestamp": 1782612161.961
+    },
+    {
+      "node": "rag",
+      "message": "Retrieved 5 chunks from: ['IFPI Global Music Report 2026', 'IFPI Global Music Report 2025']",
+      "timestamp": 1782612163.482
+    },
+    {
+      "node": "format",
+      "message": "Formatting response (route=RAG)",
+      "timestamp": 1782612163.483
+    }
+  ]
+}

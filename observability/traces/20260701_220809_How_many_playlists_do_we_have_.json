@@ -1,0 +1,191 @@
+{
+  "metadata": {
+    "timestamp": "2026-07-01T22:08:09.769865",
+    "question": "How many playlists do we have?",
+    "user_id": "alice",
+    "success": true,
+    "had_error": false,
+    "retry_count": 0
+  },
+  "pipeline": {
+    "clarification_needed": false,
+    "schema_tables": [
+      "Playlist"
+    ],
+    "generated_sql": "SELECT COUNT(p.PlaylistId) AS total_playlists FROM Playlist p LIMIT 100",
+    "sql_confidence": "high",
+    "sql_explanation": "This query counts the total number of playlists in the Playlist table.",
+    "sql_assumptions": "The question is asking for the total count of playlists, not specific details about each playlist.",
+    "validation_passed": true,
+    "guardrails_passed": true,
+    "execution_success": true
+  },
+  "validation": {
+    "valid": true,
+    "checks": {
+      "safety": {
+        "passed": true,
+        "details": "All safety checks passed"
+      },
+      "syntax": {
+        "passed": true,
+        "details": "Syntax is valid"
+      },
+      "complexity": {
+        "passed": true,
+        "score": 2,
+        "tier": "simple",
+        "details": "Complexity score: 2/10 (simple)"
+      }
+    },
+    "error": null
+  },
+  "guardrails": {
+    "permissions": {
+      "allowed": true,
+      "user_id": "alice",
+      "role": "analyst",
+      "tables_in_query": [
+        "Playlist"
+      ],
+      "denied_tables": [],
+      "reason": "Access granted"
+    },
+    "limits": {
+      "allowed": true,
+      "checks": {
+        "query_length": {
+          "passed": true,
+          "details": "71 chars (limit: 5000)"
+        },
+        "rate_limit": {
+          "passed": true,
+          "details": "6 queries in last hour (44 remaining)",
+          "remaining": 44
+        },
+        "row_limit": {
+          "passed": true,
+          "details": "LIMIT clause present"
+        }
+      },
+      "reason": "All limits passed"
+    },
+    "safety": {
+      "safe": true,
+      "checks": {
+        "injection": {
+          "passed": true,
+          "threat": null,
+          "details": "No injection patterns detected"
+        },
+        "exfiltration": {
+          "passed": true,
+          "threat": null,
+          "details": "No exfiltration patterns detected"
+        }
+      },
+      "reason": "Safe to execute"
+    }
+  },
+  "execution": {
+    "row_count": 1,
+    "execution_ms": 1,
+    "truncated": false,
+    "columns": [
+      "total_playlists"
+    ]
+  },
+  "response": {
+    "summary": "We currently have a total of 18 playlists in our database.",
+    "key_insights": [
+      "The database query returned a single row, confirming the total count of playlists.",
+      "With 18 playlists, this number provides a clear overview of our current playlist offerings."
+    ]
+  },
+  "error": {
+    "message": null,
+    "stage": null
+  },
+  "trace": [
+    {
+      "node": "clarify",
+      "message": "Checking question: 'How many playlists do we have?'",
+      "timestamp": 1782922075.695
+    },
+    {
+      "node": "clarify",
+      "message": "Question is clear \u2014 proceeding",
+      "timestamp": 1782922075.695
+    },
+    {
+      "node": "router",
+      "message": "Routing question: 'How many playlists do we have?'",
+      "timestamp": 1782922075.695
+    },
+    {
+      "node": "router",
+      "message": "Route: SQL \u2014 The question asks for a count of playlists in the Chinook database.",
+      "timestamp": 1782922084.818
+    },
+    {
+      "node": "schema",
+      "message": "Retrieving relevant schema",
+      "timestamp": 1782922084.826
+    },
+    {
+      "node": "schema",
+      "message": "Found relevant tables: ['Playlist']",
+      "timestamp": 1782922084.837
+    },
+    {
+      "node": "generate",
+      "message": "Generating SQL (attempt 1)",
+      "timestamp": 1782922084.838
+    },
+    {
+      "node": "generate",
+      "message": "SQL generated (confidence: high)",
+      "timestamp": 1782922087.483
+    },
+    {
+      "node": "validate",
+      "message": "Validating SQL",
+      "timestamp": 1782922087.485
+    },
+    {
+      "node": "validate",
+      "message": "Valid \u2014 complexity: 2/10 (simple)",
+      "timestamp": 1782922087.487
+    },
+    {
+      "node": "guardrails",
+      "message": "Running guardrail checks",
+      "timestamp": 1782922087.488
+    },
+    {
+      "node": "guardrails",
+      "message": "All guardrails passed \u2713",
+      "timestamp": 1782922087.492
+    },
+    {
+      "node": "execute",
+      "message": "Executing query",
+      "timestamp": 1782922087.493
+    },
+    {
+      "node": "execute",
+      "message": "Success \u2014 1 rows in 1ms",
+      "timestamp": 1782922087.495
+    },
+    {
+      "node": "format",
+      "message": "Formatting response (route=SQL)",
+      "timestamp": 1782922087.496
+    },
+    {
+      "node": "format",
+      "message": "Response formatted successfully",
+      "timestamp": 1782922089.768
+    }
+  ]
+}

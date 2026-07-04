@@ -1,0 +1,154 @@
+{
+  "metadata": {
+    "timestamp": "2026-06-28T08:14:13.140281",
+    "question": "Which are the top 5 artists appearing in the most playlists?",
+    "user_id": "alice",
+    "success": false,
+    "had_error": false,
+    "retry_count": 3
+  },
+  "pipeline": {
+    "clarification_needed": false,
+    "schema_tables": [
+      "Artist",
+      "Playlist"
+    ],
+    "generated_sql": "SELECT a.ArtistId, a.Name, COUNT(DISTINCT pt.PlaylistId) AS PlaylistCount FROM Artist a JOIN Track t ON a.ArtistId = t.ArtistId JOIN PlaylistTrack pt ON t.TrackId = pt.TrackId GROUP BY a.ArtistId, a.Name ORDER BY PlaylistCount DESC LIMIT 5",
+    "sql_confidence": "medium",
+    "sql_explanation": "This query selects the top 5 artists who appear in the most playlists by joining the Artist, Track, and PlaylistTrack tables, counting the distinct playlists each artist appears in, and ordering the results by this count in descending order.",
+    "sql_assumptions": "Assumes there is a Track table with ArtistId and PlaylistTrack table with TrackId and PlaylistId to facilitate the joins.",
+    "validation_passed": false,
+    "guardrails_passed": false,
+    "execution_success": false
+  },
+  "validation": {
+    "valid": false,
+    "checks": {
+      "safety": {
+        "passed": true,
+        "details": "All safety checks passed"
+      },
+      "syntax": {
+        "passed": false,
+        "details": "no such column: t.ArtistId"
+      }
+    },
+    "error": "Syntax check failed: no such column: t.ArtistId"
+  },
+  "guardrails": {
+    "permissions": null,
+    "limits": null,
+    "safety": null
+  },
+  "execution": {
+    "row_count": 0,
+    "execution_ms": 0,
+    "truncated": false,
+    "columns": []
+  },
+  "response": {
+    "summary": "",
+    "key_insights": []
+  },
+  "error": {
+    "message": null,
+    "stage": null
+  },
+  "trace": [
+    {
+      "node": "clarify",
+      "message": "Checking question: 'Which are the top 5 artists appearing in the most playlists?'",
+      "timestamp": 1782612844.728
+    },
+    {
+      "node": "clarify",
+      "message": "Question is clear \u2014 proceeding",
+      "timestamp": 1782612844.728
+    },
+    {
+      "node": "router",
+      "message": "Routing question: 'Which are the top 5 artists appearing in the most playlists?'",
+      "timestamp": 1782612844.729
+    },
+    {
+      "node": "router",
+      "message": "Route: SQL \u2014 The question asks for specific data about artists and playlists within the Chinook database.",
+      "timestamp": 1782612845.65
+    },
+    {
+      "node": "schema",
+      "message": "Retrieving relevant schema",
+      "timestamp": 1782612845.651
+    },
+    {
+      "node": "schema",
+      "message": "Found relevant tables: ['Artist', 'Playlist']",
+      "timestamp": 1782612845.661
+    },
+    {
+      "node": "generate",
+      "message": "Generating SQL (attempt 1)",
+      "timestamp": 1782612845.662
+    },
+    {
+      "node": "generate",
+      "message": "SQL generated (confidence: high)",
+      "timestamp": 1782612849.027
+    },
+    {
+      "node": "validate",
+      "message": "Validating SQL",
+      "timestamp": 1782612849.029
+    },
+    {
+      "node": "validate",
+      "message": "FAILED: Syntax check failed: no such column: t.ArtistId (retry 1/3)",
+      "timestamp": 1782612849.03
+    },
+    {
+      "node": "generate",
+      "message": "Generating SQL (attempt 2)",
+      "timestamp": 1782612849.032
+    },
+    {
+      "node": "generate",
+      "message": "SQL generated (confidence: medium)",
+      "timestamp": 1782612850.905
+    },
+    {
+      "node": "validate",
+      "message": "Validating SQL",
+      "timestamp": 1782612850.906
+    },
+    {
+      "node": "validate",
+      "message": "FAILED: Syntax check failed: no such column: t.ArtistId (retry 2/3)",
+      "timestamp": 1782612850.907
+    },
+    {
+      "node": "generate",
+      "message": "Generating SQL (attempt 3)",
+      "timestamp": 1782612850.908
+    },
+    {
+      "node": "generate",
+      "message": "SQL generated (confidence: medium)",
+      "timestamp": 1782612853.136
+    },
+    {
+      "node": "validate",
+      "message": "Validating SQL",
+      "timestamp": 1782612853.137
+    },
+    {
+      "node": "validate",
+      "message": "FAILED: Syntax check failed: no such column: t.ArtistId (retry 3/3)",
+      "timestamp": 1782612853.139
+    },
+    {
+      "node": "format",
+      "message": "Formatting response (route=SQL)",
+      "timestamp": 1782612853.14
+    }
+  ]
+}

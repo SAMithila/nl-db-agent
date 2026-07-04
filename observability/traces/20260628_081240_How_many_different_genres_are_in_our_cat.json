@@ -1,0 +1,191 @@
+{
+  "metadata": {
+    "timestamp": "2026-06-28T08:12:40.159496",
+    "question": "How many different genres are in our catalog?",
+    "user_id": "alice",
+    "success": true,
+    "had_error": false,
+    "retry_count": 0
+  },
+  "pipeline": {
+    "clarification_needed": false,
+    "schema_tables": [
+      "Genre"
+    ],
+    "generated_sql": "SELECT COUNT(DISTINCT g.GenreId) AS genre_count FROM Genre g LIMIT 100;",
+    "sql_confidence": "high",
+    "sql_explanation": "This query counts the number of distinct genres in the Genre table.",
+    "sql_assumptions": "Assuming 'different genres' refers to distinct GenreId values.",
+    "validation_passed": true,
+    "guardrails_passed": true,
+    "execution_success": true
+  },
+  "validation": {
+    "valid": true,
+    "checks": {
+      "safety": {
+        "passed": true,
+        "details": "All safety checks passed"
+      },
+      "syntax": {
+        "passed": true,
+        "details": "Syntax is valid"
+      },
+      "complexity": {
+        "passed": true,
+        "score": 3,
+        "tier": "simple",
+        "details": "Complexity score: 3/10 (simple)"
+      }
+    },
+    "error": null
+  },
+  "guardrails": {
+    "permissions": {
+      "allowed": true,
+      "user_id": "alice",
+      "role": "analyst",
+      "tables_in_query": [
+        "Genre"
+      ],
+      "denied_tables": [],
+      "reason": "Access granted"
+    },
+    "limits": {
+      "allowed": true,
+      "checks": {
+        "query_length": {
+          "passed": true,
+          "details": "71 chars (limit: 5000)"
+        },
+        "rate_limit": {
+          "passed": true,
+          "details": "5 queries in last hour (45 remaining)",
+          "remaining": 45
+        },
+        "row_limit": {
+          "passed": true,
+          "details": "LIMIT clause present"
+        }
+      },
+      "reason": "All limits passed"
+    },
+    "safety": {
+      "safe": true,
+      "checks": {
+        "injection": {
+          "passed": true,
+          "threat": null,
+          "details": "No injection patterns detected"
+        },
+        "exfiltration": {
+          "passed": true,
+          "threat": null,
+          "details": "No exfiltration patterns detected"
+        }
+      },
+      "reason": "Safe to execute"
+    }
+  },
+  "execution": {
+    "row_count": 1,
+    "execution_ms": 1,
+    "truncated": false,
+    "columns": [
+      "genre_count"
+    ]
+  },
+  "response": {
+    "summary": "Our catalog currently contains 25 different genres, providing a diverse range of options for our customers.",
+    "key_insights": [
+      "The catalog's 25 genres indicate a broad selection that can cater to varied customer preferences.",
+      "With 25 distinct genres, we have the opportunity to analyze which genres are most popular and tailor our offerings accordingly."
+    ]
+  },
+  "error": {
+    "message": null,
+    "stage": null
+  },
+  "trace": [
+    {
+      "node": "clarify",
+      "message": "Checking question: 'How many different genres are in our catalog?'",
+      "timestamp": 1782612754.954
+    },
+    {
+      "node": "clarify",
+      "message": "Question is clear \u2014 proceeding",
+      "timestamp": 1782612754.954
+    },
+    {
+      "node": "router",
+      "message": "Routing question: 'How many different genres are in our catalog?'",
+      "timestamp": 1782612754.955
+    },
+    {
+      "node": "router",
+      "message": "Route: SQL \u2014 The question asks for a count of genres in our catalog, which is specific data in the Chinook database.",
+      "timestamp": 1782612756.615
+    },
+    {
+      "node": "schema",
+      "message": "Retrieving relevant schema",
+      "timestamp": 1782612756.617
+    },
+    {
+      "node": "schema",
+      "message": "Found relevant tables: ['Genre']",
+      "timestamp": 1782612756.622
+    },
+    {
+      "node": "generate",
+      "message": "Generating SQL (attempt 1)",
+      "timestamp": 1782612756.623
+    },
+    {
+      "node": "generate",
+      "message": "SQL generated (confidence: high)",
+      "timestamp": 1782612758.054
+    },
+    {
+      "node": "validate",
+      "message": "Validating SQL",
+      "timestamp": 1782612758.055
+    },
+    {
+      "node": "validate",
+      "message": "Valid \u2014 complexity: 3/10 (simple)",
+      "timestamp": 1782612758.056
+    },
+    {
+      "node": "guardrails",
+      "message": "Running guardrail checks",
+      "timestamp": 1782612758.057
+    },
+    {
+      "node": "guardrails",
+      "message": "All guardrails passed \u2713",
+      "timestamp": 1782612758.062
+    },
+    {
+      "node": "execute",
+      "message": "Executing query",
+      "timestamp": 1782612758.063
+    },
+    {
+      "node": "execute",
+      "message": "Success \u2014 1 rows in 1ms",
+      "timestamp": 1782612758.065
+    },
+    {
+      "node": "format",
+      "message": "Formatting response (route=SQL)",
+      "timestamp": 1782612758.066
+    },
+    {
+      "node": "format",
+      "message": "Response formatted successfully",
+      "timestamp": 1782612759.288
+    }
+  ]
+}

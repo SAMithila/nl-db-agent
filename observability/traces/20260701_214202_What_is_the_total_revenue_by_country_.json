@@ -1,0 +1,195 @@
+{
+  "metadata": {
+    "timestamp": "2026-07-01T21:42:02.436990",
+    "question": "What is the total revenue by country?",
+    "user_id": "alice",
+    "success": true,
+    "had_error": false,
+    "retry_count": 0
+  },
+  "pipeline": {
+    "clarification_needed": false,
+    "schema_tables": [
+      "Customer",
+      "Invoice",
+      "InvoiceLine"
+    ],
+    "generated_sql": "SELECT c.Country, SUM(i.Total) AS total_revenue FROM Customer c JOIN Invoice i ON c.CustomerId = i.CustomerId GROUP BY c.Country LIMIT 100;",
+    "sql_confidence": "high",
+    "sql_explanation": "This query calculates the total revenue for each country by joining the Customer and Invoice tables on CustomerId, summing up the Total from the Invoice table, and grouping the results by country.",
+    "sql_assumptions": "The revenue is calculated based on the Total column in the Invoice table, which represents the total amount for each invoice.",
+    "validation_passed": true,
+    "guardrails_passed": true,
+    "execution_success": true
+  },
+  "validation": {
+    "valid": true,
+    "checks": {
+      "safety": {
+        "passed": true,
+        "details": "All safety checks passed"
+      },
+      "syntax": {
+        "passed": true,
+        "details": "Syntax is valid"
+      },
+      "complexity": {
+        "passed": true,
+        "score": 5,
+        "tier": "medium",
+        "details": "Complexity score: 5/10 (medium)"
+      }
+    },
+    "error": null
+  },
+  "guardrails": {
+    "permissions": {
+      "allowed": true,
+      "user_id": "alice",
+      "role": "analyst",
+      "tables_in_query": [
+        "Customer",
+        "Invoice"
+      ],
+      "denied_tables": [],
+      "reason": "Access granted"
+    },
+    "limits": {
+      "allowed": true,
+      "checks": {
+        "query_length": {
+          "passed": true,
+          "details": "139 chars (limit: 5000)"
+        },
+        "rate_limit": {
+          "passed": true,
+          "details": "14 queries in last hour (36 remaining)",
+          "remaining": 36
+        },
+        "row_limit": {
+          "passed": true,
+          "details": "LIMIT clause present"
+        }
+      },
+      "reason": "All limits passed"
+    },
+    "safety": {
+      "safe": true,
+      "checks": {
+        "injection": {
+          "passed": true,
+          "threat": null,
+          "details": "No injection patterns detected"
+        },
+        "exfiltration": {
+          "passed": true,
+          "threat": null,
+          "details": "No exfiltration patterns detected"
+        }
+      },
+      "reason": "Safe to execute"
+    }
+  },
+  "execution": {
+    "row_count": 24,
+    "execution_ms": 4,
+    "truncated": false,
+    "columns": [
+      "Country",
+      "total_revenue"
+    ]
+  },
+  "response": {
+    "summary": "The total revenue by country shows that Canada leads with a revenue of 303.96, followed by Brazil with 190.1. Other countries like Austria and Czech Republic have revenues of 42.62 and 90.24 respectively.",
+    "key_insights": [
+      "Canada has the highest total revenue at 303.96, significantly higher than other countries.",
+      "Brazil is the second highest with a total revenue of 190.1, indicating strong performance in that market."
+    ]
+  },
+  "error": {
+    "message": null,
+    "stage": null
+  },
+  "trace": [
+    {
+      "node": "clarify",
+      "message": "Checking question: 'What is the total revenue by country?'",
+      "timestamp": 1782920509.929
+    },
+    {
+      "node": "clarify",
+      "message": "Question is clear \u2014 proceeding",
+      "timestamp": 1782920509.929
+    },
+    {
+      "node": "router",
+      "message": "Routing question: 'What is the total revenue by country?'",
+      "timestamp": 1782920509.929
+    },
+    {
+      "node": "router",
+      "message": "Route: SQL \u2014 The question asks for a total revenue breakdown by country, which is specific data available in the Chinook database.",
+      "timestamp": 1782920512.061
+    },
+    {
+      "node": "schema",
+      "message": "Retrieving relevant schema",
+      "timestamp": 1782920512.062
+    },
+    {
+      "node": "schema",
+      "message": "Found relevant tables: ['Customer', 'Invoice', 'InvoiceLine']",
+      "timestamp": 1782920512.076
+    },
+    {
+      "node": "generate",
+      "message": "Generating SQL (attempt 1)",
+      "timestamp": 1782920512.076
+    },
+    {
+      "node": "generate",
+      "message": "SQL generated (confidence: high)",
+      "timestamp": 1782920516.848
+    },
+    {
+      "node": "validate",
+      "message": "Validating SQL",
+      "timestamp": 1782920516.85
+    },
+    {
+      "node": "validate",
+      "message": "Valid \u2014 complexity: 5/10 (medium)",
+      "timestamp": 1782920516.852
+    },
+    {
+      "node": "guardrails",
+      "message": "Running guardrail checks",
+      "timestamp": 1782920516.853
+    },
+    {
+      "node": "guardrails",
+      "message": "All guardrails passed \u2713",
+      "timestamp": 1782920516.857
+    },
+    {
+      "node": "execute",
+      "message": "Executing query",
+      "timestamp": 1782920516.858
+    },
+    {
+      "node": "execute",
+      "message": "Success \u2014 24 rows in 4ms",
+      "timestamp": 1782920516.863
+    },
+    {
+      "node": "format",
+      "message": "Formatting response (route=SQL)",
+      "timestamp": 1782920516.864
+    },
+    {
+      "node": "format",
+      "message": "Response formatted successfully",
+      "timestamp": 1782920520.369
+    }
+  ]
+}

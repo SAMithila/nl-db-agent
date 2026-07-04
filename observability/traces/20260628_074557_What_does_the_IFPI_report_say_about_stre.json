@@ -1,0 +1,80 @@
+{
+  "metadata": {
+    "timestamp": "2026-06-28T07:45:57.236266",
+    "question": "What does the IFPI report say about streaming fraud?",
+    "user_id": "alice",
+    "success": false,
+    "had_error": false,
+    "retry_count": 0
+  },
+  "pipeline": {
+    "clarification_needed": false,
+    "schema_tables": [],
+    "generated_sql": null,
+    "sql_confidence": "",
+    "sql_explanation": "",
+    "sql_assumptions": "",
+    "validation_passed": false,
+    "guardrails_passed": false,
+    "execution_success": false
+  },
+  "validation": null,
+  "guardrails": {
+    "permissions": null,
+    "limits": null,
+    "safety": null
+  },
+  "execution": {
+    "row_count": 0,
+    "execution_ms": 0,
+    "truncated": false,
+    "columns": []
+  },
+  "response": {
+    "summary": "The IFPI Global Music Report 2026 highlights several key points about streaming fraud:\n\n1. **Nature of Streaming Fraud**: Fraudsters exploit gaps in music platforms' protections by uploading tracks via distributors and using 'bots' to create artificial plays. This diverts income from legitimate creators, as streaming services pay rights holders from a finite revenue pool (Source 1).\n\n2. **Impact and Scale**: Streaming fraud is described as a significant threat, with 85% of all streams on AI-generated music being fraudulent in 2025, up from 70% the previous year. The report emphasizes that streaming fraud is a new form of piracy and is more damaging than many realize (Source 2).\n\n3. **Industry Response**: The report calls for the entire music community to come together to tackle streaming fraud, suggesting that applying best practices can make it difficult and expensive to pursue. It also mentions that IFPI and its member companies are taking legal action against those enabling and profiting from streaming fraud, leading to the shutdown of manipulation services in multiple territories (Sources 2 and 5).\n\n4. **Challenges in Detection**: The creation of artificial content and listening makes large-scale fraud cheaper and faster to perpetrate, complicating detection efforts (Source 5).\n\nOverall, the report underscores the need for collective and sustained action to combat streaming fraud effectively.",
+    "key_insights": [
+      "Source: IFPI Global Music Report 2026 (IFPI, 2026)"
+    ]
+  },
+  "error": {
+    "message": null,
+    "stage": null
+  },
+  "trace": [
+    {
+      "node": "clarify",
+      "message": "Checking question: 'What does the IFPI report say about streaming fraud?'",
+      "timestamp": 1782611151.36
+    },
+    {
+      "node": "clarify",
+      "message": "Question is clear \u2014 proceeding",
+      "timestamp": 1782611151.36
+    },
+    {
+      "node": "router",
+      "message": "Routing question: 'What does the IFPI report say about streaming fraud?'",
+      "timestamp": 1782611151.36
+    },
+    {
+      "node": "router",
+      "message": "Route: RAG \u2014 The question asks for information specifically from the IFPI report, which is an external document.",
+      "timestamp": 1782611152.508
+    },
+    {
+      "node": "rag",
+      "message": "Searching documents: 'Details about streaming fraud as discussed in the IFPI Global Music Report.'",
+      "timestamp": 1782611152.509
+    },
+    {
+      "node": "rag",
+      "message": "Retrieved 5 chunks from: ['IFPI Global Music Report 2026']",
+      "timestamp": 1782611153.245
+    },
+    {
+      "node": "format",
+      "message": "Formatting response (route=RAG)",
+      "timestamp": 1782611153.246
+    }
+  ]
+}

@@ -1,0 +1,191 @@
+{
+  "metadata": {
+    "timestamp": "2026-07-01T21:41:36.544503",
+    "question": "What is the average invoice total?",
+    "user_id": "alice",
+    "success": true,
+    "had_error": false,
+    "retry_count": 0
+  },
+  "pipeline": {
+    "clarification_needed": false,
+    "schema_tables": [
+      "Invoice"
+    ],
+    "generated_sql": "SELECT AVG(i.Total) AS average_invoice_total FROM Invoice i LIMIT 100;",
+    "sql_confidence": "high",
+    "sql_explanation": "This query calculates the average total amount of all invoices in the Invoice table.",
+    "sql_assumptions": "The question is asking for the average of all invoices without any date or customer filtering.",
+    "validation_passed": true,
+    "guardrails_passed": true,
+    "execution_success": true
+  },
+  "validation": {
+    "valid": true,
+    "checks": {
+      "safety": {
+        "passed": true,
+        "details": "All safety checks passed"
+      },
+      "syntax": {
+        "passed": true,
+        "details": "Syntax is valid"
+      },
+      "complexity": {
+        "passed": true,
+        "score": 2,
+        "tier": "simple",
+        "details": "Complexity score: 2/10 (simple)"
+      }
+    },
+    "error": null
+  },
+  "guardrails": {
+    "permissions": {
+      "allowed": true,
+      "user_id": "alice",
+      "role": "analyst",
+      "tables_in_query": [
+        "Invoice"
+      ],
+      "denied_tables": [],
+      "reason": "Access granted"
+    },
+    "limits": {
+      "allowed": true,
+      "checks": {
+        "query_length": {
+          "passed": true,
+          "details": "70 chars (limit: 5000)"
+        },
+        "rate_limit": {
+          "passed": true,
+          "details": "12 queries in last hour (38 remaining)",
+          "remaining": 38
+        },
+        "row_limit": {
+          "passed": true,
+          "details": "LIMIT clause present"
+        }
+      },
+      "reason": "All limits passed"
+    },
+    "safety": {
+      "safe": true,
+      "checks": {
+        "injection": {
+          "passed": true,
+          "threat": null,
+          "details": "No injection patterns detected"
+        },
+        "exfiltration": {
+          "passed": true,
+          "threat": null,
+          "details": "No exfiltration patterns detected"
+        }
+      },
+      "reason": "Safe to execute"
+    }
+  },
+  "execution": {
+    "row_count": 1,
+    "execution_ms": 2,
+    "truncated": false,
+    "columns": [
+      "average_invoice_total"
+    ]
+  },
+  "response": {
+    "summary": "The average invoice total is approximately $5.65.",
+    "key_insights": [
+      "The average invoice total of $5.65 suggests that most transactions are relatively low in value.",
+      "With an average of $5.65, this could indicate a high volume of small transactions, which might be typical for a business with low-cost items."
+    ]
+  },
+  "error": {
+    "message": null,
+    "stage": null
+  },
+  "trace": [
+    {
+      "node": "clarify",
+      "message": "Checking question: 'What is the average invoice total?'",
+      "timestamp": 1782920487.714
+    },
+    {
+      "node": "clarify",
+      "message": "Question is clear \u2014 proceeding",
+      "timestamp": 1782920487.714
+    },
+    {
+      "node": "router",
+      "message": "Routing question: 'What is the average invoice total?'",
+      "timestamp": 1782920487.715
+    },
+    {
+      "node": "router",
+      "message": "Route: SQL \u2014 The question asks for a specific calculation based on our sales data in the Chinook database.",
+      "timestamp": 1782920489.208
+    },
+    {
+      "node": "schema",
+      "message": "Retrieving relevant schema",
+      "timestamp": 1782920489.21
+    },
+    {
+      "node": "schema",
+      "message": "Found relevant tables: ['Invoice']",
+      "timestamp": 1782920489.22
+    },
+    {
+      "node": "generate",
+      "message": "Generating SQL (attempt 1)",
+      "timestamp": 1782920489.221
+    },
+    {
+      "node": "generate",
+      "message": "SQL generated (confidence: high)",
+      "timestamp": 1782920492.436
+    },
+    {
+      "node": "validate",
+      "message": "Validating SQL",
+      "timestamp": 1782920492.438
+    },
+    {
+      "node": "validate",
+      "message": "Valid \u2014 complexity: 2/10 (simple)",
+      "timestamp": 1782920492.439
+    },
+    {
+      "node": "guardrails",
+      "message": "Running guardrail checks",
+      "timestamp": 1782920492.439
+    },
+    {
+      "node": "guardrails",
+      "message": "All guardrails passed \u2713",
+      "timestamp": 1782920492.443
+    },
+    {
+      "node": "execute",
+      "message": "Executing query",
+      "timestamp": 1782920492.444
+    },
+    {
+      "node": "execute",
+      "message": "Success \u2014 1 rows in 2ms",
+      "timestamp": 1782920492.446
+    },
+    {
+      "node": "format",
+      "message": "Formatting response (route=SQL)",
+      "timestamp": 1782920492.447
+    },
+    {
+      "node": "format",
+      "message": "Response formatted successfully",
+      "timestamp": 1782920494.567
+    }
+  ]
+}

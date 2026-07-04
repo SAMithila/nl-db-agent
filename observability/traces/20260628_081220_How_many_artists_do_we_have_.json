@@ -1,0 +1,191 @@
+{
+  "metadata": {
+    "timestamp": "2026-06-28T08:12:20.197910",
+    "question": "How many artists do we have?",
+    "user_id": "alice",
+    "success": true,
+    "had_error": false,
+    "retry_count": 0
+  },
+  "pipeline": {
+    "clarification_needed": false,
+    "schema_tables": [
+      "Artist"
+    ],
+    "generated_sql": "SELECT COUNT(a.ArtistId) AS artist_count FROM Artist a LIMIT 100;",
+    "sql_confidence": "high",
+    "sql_explanation": "This query counts the total number of artists in the Artist table.",
+    "sql_assumptions": "None, the question is straightforward.",
+    "validation_passed": true,
+    "guardrails_passed": true,
+    "execution_success": true
+  },
+  "validation": {
+    "valid": true,
+    "checks": {
+      "safety": {
+        "passed": true,
+        "details": "All safety checks passed"
+      },
+      "syntax": {
+        "passed": true,
+        "details": "Syntax is valid"
+      },
+      "complexity": {
+        "passed": true,
+        "score": 3,
+        "tier": "simple",
+        "details": "Complexity score: 3/10 (simple)"
+      }
+    },
+    "error": null
+  },
+  "guardrails": {
+    "permissions": {
+      "allowed": true,
+      "user_id": "alice",
+      "role": "analyst",
+      "tables_in_query": [
+        "Artist"
+      ],
+      "denied_tables": [],
+      "reason": "Access granted"
+    },
+    "limits": {
+      "allowed": true,
+      "checks": {
+        "query_length": {
+          "passed": true,
+          "details": "65 chars (limit: 5000)"
+        },
+        "rate_limit": {
+          "passed": true,
+          "details": "1 queries in last hour (49 remaining)",
+          "remaining": 49
+        },
+        "row_limit": {
+          "passed": true,
+          "details": "LIMIT clause present"
+        }
+      },
+      "reason": "All limits passed"
+    },
+    "safety": {
+      "safe": true,
+      "checks": {
+        "injection": {
+          "passed": true,
+          "threat": null,
+          "details": "No injection patterns detected"
+        },
+        "exfiltration": {
+          "passed": true,
+          "threat": null,
+          "details": "No exfiltration patterns detected"
+        }
+      },
+      "reason": "Safe to execute"
+    }
+  },
+  "execution": {
+    "row_count": 1,
+    "execution_ms": 6,
+    "truncated": false,
+    "columns": [
+      "artist_count"
+    ]
+  },
+  "response": {
+    "summary": "We currently have a total of 275 artists in our database.",
+    "key_insights": [
+      "The database query returned a single row, indicating a straightforward count of artists.",
+      "With 275 artists, we have a substantial pool of talent that can be leveraged for various projects."
+    ]
+  },
+  "error": {
+    "message": null,
+    "stage": null
+  },
+  "trace": [
+    {
+      "node": "clarify",
+      "message": "Checking question: 'How many artists do we have?'",
+      "timestamp": 1782612735.673
+    },
+    {
+      "node": "clarify",
+      "message": "Question is clear \u2014 proceeding",
+      "timestamp": 1782612735.673
+    },
+    {
+      "node": "router",
+      "message": "Routing question: 'How many artists do we have?'",
+      "timestamp": 1782612735.674
+    },
+    {
+      "node": "router",
+      "message": "Route: SQL \u2014 The question asks for a count of artists in the Chinook database, which is specific internal data.",
+      "timestamp": 1782612736.897
+    },
+    {
+      "node": "schema",
+      "message": "Retrieving relevant schema",
+      "timestamp": 1782612736.897
+    },
+    {
+      "node": "schema",
+      "message": "Found relevant tables: ['Artist']",
+      "timestamp": 1782612736.9
+    },
+    {
+      "node": "generate",
+      "message": "Generating SQL (attempt 1)",
+      "timestamp": 1782612736.9
+    },
+    {
+      "node": "generate",
+      "message": "SQL generated (confidence: high)",
+      "timestamp": 1782612738.018
+    },
+    {
+      "node": "validate",
+      "message": "Validating SQL",
+      "timestamp": 1782612738.02
+    },
+    {
+      "node": "validate",
+      "message": "Valid \u2014 complexity: 3/10 (simple)",
+      "timestamp": 1782612738.023
+    },
+    {
+      "node": "guardrails",
+      "message": "Running guardrail checks",
+      "timestamp": 1782612738.024
+    },
+    {
+      "node": "guardrails",
+      "message": "All guardrails passed \u2713",
+      "timestamp": 1782612738.028
+    },
+    {
+      "node": "execute",
+      "message": "Executing query",
+      "timestamp": 1782612738.029
+    },
+    {
+      "node": "execute",
+      "message": "Success \u2014 1 rows in 6ms",
+      "timestamp": 1782612738.036
+    },
+    {
+      "node": "format",
+      "message": "Formatting response (route=SQL)",
+      "timestamp": 1782612738.037
+    },
+    {
+      "node": "format",
+      "message": "Response formatted successfully",
+      "timestamp": 1782612739.215
+    }
+  ]
+}

@@ -1,0 +1,191 @@
+{
+  "metadata": {
+    "timestamp": "2026-06-28T08:03:59.575163",
+    "question": "How many employees do we have?",
+    "user_id": "alice",
+    "success": true,
+    "had_error": false,
+    "retry_count": 0
+  },
+  "pipeline": {
+    "clarification_needed": false,
+    "schema_tables": [
+      "Employee"
+    ],
+    "generated_sql": "SELECT COUNT(e.EmployeeId) AS employee_count FROM Employee e LIMIT 100;",
+    "sql_confidence": "high",
+    "sql_explanation": "This query counts the total number of employees in the Employee table.",
+    "sql_assumptions": "The question is asking for the total count of employees without any specific conditions.",
+    "validation_passed": true,
+    "guardrails_passed": true,
+    "execution_success": true
+  },
+  "validation": {
+    "valid": true,
+    "checks": {
+      "safety": {
+        "passed": true,
+        "details": "All safety checks passed"
+      },
+      "syntax": {
+        "passed": true,
+        "details": "Syntax is valid"
+      },
+      "complexity": {
+        "passed": true,
+        "score": 3,
+        "tier": "simple",
+        "details": "Complexity score: 3/10 (simple)"
+      }
+    },
+    "error": null
+  },
+  "guardrails": {
+    "permissions": {
+      "allowed": true,
+      "user_id": "alice",
+      "role": "analyst",
+      "tables_in_query": [
+        "Employee"
+      ],
+      "denied_tables": [],
+      "reason": "Access granted"
+    },
+    "limits": {
+      "allowed": true,
+      "checks": {
+        "query_length": {
+          "passed": true,
+          "details": "71 chars (limit: 5000)"
+        },
+        "rate_limit": {
+          "passed": true,
+          "details": "7 queries in last hour (43 remaining)",
+          "remaining": 43
+        },
+        "row_limit": {
+          "passed": true,
+          "details": "LIMIT clause present"
+        }
+      },
+      "reason": "All limits passed"
+    },
+    "safety": {
+      "safe": true,
+      "checks": {
+        "injection": {
+          "passed": true,
+          "threat": null,
+          "details": "No injection patterns detected"
+        },
+        "exfiltration": {
+          "passed": true,
+          "threat": null,
+          "details": "No exfiltration patterns detected"
+        }
+      },
+      "reason": "Safe to execute"
+    }
+  },
+  "execution": {
+    "row_count": 1,
+    "execution_ms": 1,
+    "truncated": false,
+    "columns": [
+      "employee_count"
+    ]
+  },
+  "response": {
+    "summary": "We currently have a total of 8 employees in our organization.",
+    "key_insights": [
+      "The employee count is relatively small, which could indicate a tight-knit team or a startup environment.",
+      "With only 8 employees, each team member may have a significant impact on the company's operations and culture."
+    ]
+  },
+  "error": {
+    "message": null,
+    "stage": null
+  },
+  "trace": [
+    {
+      "node": "clarify",
+      "message": "Checking question: 'How many employees do we have?'",
+      "timestamp": 1782612234.958
+    },
+    {
+      "node": "clarify",
+      "message": "Question is clear \u2014 proceeding",
+      "timestamp": 1782612234.958
+    },
+    {
+      "node": "router",
+      "message": "Routing question: 'How many employees do we have?'",
+      "timestamp": 1782612234.959
+    },
+    {
+      "node": "router",
+      "message": "Route: SQL \u2014 The question asks for a count of employees, which is specific data in the Chinook database.",
+      "timestamp": 1782612235.93
+    },
+    {
+      "node": "schema",
+      "message": "Retrieving relevant schema",
+      "timestamp": 1782612235.932
+    },
+    {
+      "node": "schema",
+      "message": "Found relevant tables: ['Employee']",
+      "timestamp": 1782612235.94
+    },
+    {
+      "node": "generate",
+      "message": "Generating SQL (attempt 1)",
+      "timestamp": 1782612235.942
+    },
+    {
+      "node": "generate",
+      "message": "SQL generated (confidence: high)",
+      "timestamp": 1782612237.236
+    },
+    {
+      "node": "validate",
+      "message": "Validating SQL",
+      "timestamp": 1782612237.238
+    },
+    {
+      "node": "validate",
+      "message": "Valid \u2014 complexity: 3/10 (simple)",
+      "timestamp": 1782612237.24
+    },
+    {
+      "node": "guardrails",
+      "message": "Running guardrail checks",
+      "timestamp": 1782612237.241
+    },
+    {
+      "node": "guardrails",
+      "message": "All guardrails passed \u2713",
+      "timestamp": 1782612237.246
+    },
+    {
+      "node": "execute",
+      "message": "Executing query",
+      "timestamp": 1782612237.247
+    },
+    {
+      "node": "execute",
+      "message": "Success \u2014 1 rows in 1ms",
+      "timestamp": 1782612237.248
+    },
+    {
+      "node": "format",
+      "message": "Formatting response (route=SQL)",
+      "timestamp": 1782612237.249
+    },
+    {
+      "node": "format",
+      "message": "Response formatted successfully",
+      "timestamp": 1782612238.314
+    }
+  ]
+}

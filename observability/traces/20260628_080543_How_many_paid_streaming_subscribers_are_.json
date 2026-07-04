@@ -1,0 +1,82 @@
+{
+  "metadata": {
+    "timestamp": "2026-06-28T08:05:43.199807",
+    "question": "How many paid streaming subscribers are there worldwide?",
+    "user_id": "alice",
+    "success": false,
+    "had_error": false,
+    "retry_count": 0
+  },
+  "pipeline": {
+    "clarification_needed": false,
+    "schema_tables": [],
+    "generated_sql": null,
+    "sql_confidence": "",
+    "sql_explanation": "",
+    "sql_assumptions": "",
+    "validation_passed": false,
+    "guardrails_passed": false,
+    "execution_success": false
+  },
+  "validation": null,
+  "guardrails": {
+    "permissions": null,
+    "limits": null,
+    "safety": null
+  },
+  "execution": {
+    "row_count": 0,
+    "execution_ms": 0,
+    "truncated": false,
+    "columns": []
+  },
+  "response": {
+    "summary": "The provided documents do not contain specific information on the number of paid streaming subscribers worldwide. For detailed and accurate data, you may need to refer to the full IFPI Global Music Report 2025 Premium Edition or other industry reports that focus on streaming metrics.",
+    "key_insights": [
+      "Source: IFPI Global Music Report 2025 (IFPI, 2025)",
+      "Source: Luminate 2025 Year-End Music Report (Luminate, 2025)",
+      "Source: IFPI Global Music Report 2026 (IFPI, 2026)"
+    ]
+  },
+  "error": {
+    "message": null,
+    "stage": null
+  },
+  "trace": [
+    {
+      "node": "clarify",
+      "message": "Checking question: 'How many paid streaming subscribers are there worldwide?'",
+      "timestamp": 1782612340.25
+    },
+    {
+      "node": "clarify",
+      "message": "Question is clear \u2014 proceeding",
+      "timestamp": 1782612340.25
+    },
+    {
+      "node": "router",
+      "message": "Routing question: 'How many paid streaming subscribers are there worldwide?'",
+      "timestamp": 1782612340.25
+    },
+    {
+      "node": "router",
+      "message": "Route: RAG \u2014 The question asks for global streaming subscriber data, which is not in the Chinook database.",
+      "timestamp": 1782612341.365
+    },
+    {
+      "node": "rag",
+      "message": "Searching documents: 'Look for global streaming subscriber data in the IFPI Global Music Report 2025 & 2026 or Spotify Annual Report 20-F.'",
+      "timestamp": 1782612341.367
+    },
+    {
+      "node": "rag",
+      "message": "Retrieved 5 chunks from: ['IFPI Global Music Report 2025', 'Luminate 2025 Year-End Music Report', 'IFPI Global Music Report 2026']",
+      "timestamp": 1782612342.023
+    },
+    {
+      "node": "format",
+      "message": "Formatting response (route=RAG)",
+      "timestamp": 1782612342.025
+    }
+  ]
+}

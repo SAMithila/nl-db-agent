@@ -1,0 +1,191 @@
+{
+  "metadata": {
+    "timestamp": "2026-06-28T08:12:24.844041",
+    "question": "How many customers are from the USA?",
+    "user_id": "alice",
+    "success": true,
+    "had_error": false,
+    "retry_count": 0
+  },
+  "pipeline": {
+    "clarification_needed": false,
+    "schema_tables": [
+      "Customer"
+    ],
+    "generated_sql": "SELECT COUNT(*) FROM Customer c WHERE c.Country = 'USA';",
+    "sql_confidence": "high",
+    "sql_explanation": "This query counts the number of customers whose country is listed as 'USA'.",
+    "sql_assumptions": "The question assumes 'USA' is the exact value used in the Country column for United States customers.",
+    "validation_passed": true,
+    "guardrails_passed": true,
+    "execution_success": true
+  },
+  "validation": {
+    "valid": true,
+    "checks": {
+      "safety": {
+        "passed": true,
+        "details": "All safety checks passed"
+      },
+      "syntax": {
+        "passed": true,
+        "details": "Syntax is valid"
+      },
+      "complexity": {
+        "passed": true,
+        "score": 3,
+        "tier": "simple",
+        "details": "Complexity score: 3/10 (simple)"
+      }
+    },
+    "error": null
+  },
+  "guardrails": {
+    "permissions": {
+      "allowed": true,
+      "user_id": "alice",
+      "role": "analyst",
+      "tables_in_query": [
+        "Customer"
+      ],
+      "denied_tables": [],
+      "reason": "Access granted"
+    },
+    "limits": {
+      "allowed": true,
+      "checks": {
+        "query_length": {
+          "passed": true,
+          "details": "56 chars (limit: 5000)"
+        },
+        "rate_limit": {
+          "passed": true,
+          "details": "2 queries in last hour (48 remaining)",
+          "remaining": 48
+        },
+        "row_limit": {
+          "passed": true,
+          "details": "No LIMIT clause \u2014 executor will cap at 100 rows"
+        }
+      },
+      "reason": "All limits passed"
+    },
+    "safety": {
+      "safe": true,
+      "checks": {
+        "injection": {
+          "passed": true,
+          "threat": null,
+          "details": "No injection patterns detected"
+        },
+        "exfiltration": {
+          "passed": true,
+          "threat": null,
+          "details": "No exfiltration patterns detected"
+        }
+      },
+      "reason": "Safe to execute"
+    }
+  },
+  "execution": {
+    "row_count": 1,
+    "execution_ms": 2,
+    "truncated": false,
+    "columns": [
+      "COUNT(*)"
+    ]
+  },
+  "response": {
+    "summary": "There are 13 customers from the USA according to the database results.",
+    "key_insights": [
+      "The database query returned a total of 1 row, indicating a straightforward count of USA customers.",
+      "The assumption is that 'USA' is consistently used as the value in the Country column for all United States customers."
+    ]
+  },
+  "error": {
+    "message": null,
+    "stage": null
+  },
+  "trace": [
+    {
+      "node": "clarify",
+      "message": "Checking question: 'How many customers are from the USA?'",
+      "timestamp": 1782612740.218
+    },
+    {
+      "node": "clarify",
+      "message": "Question is clear \u2014 proceeding",
+      "timestamp": 1782612740.218
+    },
+    {
+      "node": "router",
+      "message": "Routing question: 'How many customers are from the USA?'",
+      "timestamp": 1782612740.219
+    },
+    {
+      "node": "router",
+      "message": "Route: SQL \u2014 The question asks for a count of customers from a specific country in our database.",
+      "timestamp": 1782612741.217
+    },
+    {
+      "node": "schema",
+      "message": "Retrieving relevant schema",
+      "timestamp": 1782612741.219
+    },
+    {
+      "node": "schema",
+      "message": "Found relevant tables: ['Customer']",
+      "timestamp": 1782612741.226
+    },
+    {
+      "node": "generate",
+      "message": "Generating SQL (attempt 1)",
+      "timestamp": 1782612741.227
+    },
+    {
+      "node": "generate",
+      "message": "SQL generated (confidence: high)",
+      "timestamp": 1782612742.766
+    },
+    {
+      "node": "validate",
+      "message": "Validating SQL",
+      "timestamp": 1782612742.768
+    },
+    {
+      "node": "validate",
+      "message": "Valid \u2014 complexity: 3/10 (simple)",
+      "timestamp": 1782612742.77
+    },
+    {
+      "node": "guardrails",
+      "message": "Running guardrail checks",
+      "timestamp": 1782612742.771
+    },
+    {
+      "node": "guardrails",
+      "message": "All guardrails passed \u2713",
+      "timestamp": 1782612742.777
+    },
+    {
+      "node": "execute",
+      "message": "Executing query",
+      "timestamp": 1782612742.778
+    },
+    {
+      "node": "execute",
+      "message": "Success \u2014 1 rows in 2ms",
+      "timestamp": 1782612742.781
+    },
+    {
+      "node": "format",
+      "message": "Formatting response (route=SQL)",
+      "timestamp": 1782612742.782
+    },
+    {
+      "node": "format",
+      "message": "Response formatted successfully",
+      "timestamp": 1782612743.938
+    }
+  ]
+}

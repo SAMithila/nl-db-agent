@@ -1,0 +1,81 @@
+{
+  "metadata": {
+    "timestamp": "2026-06-28T08:14:28.893928",
+    "question": "According to IFPI, how much did global music revenues grow in 2025?",
+    "user_id": "alice",
+    "success": false,
+    "had_error": false,
+    "retry_count": 0
+  },
+  "pipeline": {
+    "clarification_needed": false,
+    "schema_tables": [],
+    "generated_sql": null,
+    "sql_confidence": "",
+    "sql_explanation": "",
+    "sql_assumptions": "",
+    "validation_passed": false,
+    "guardrails_passed": false,
+    "execution_success": false
+  },
+  "validation": null,
+  "guardrails": {
+    "permissions": null,
+    "limits": null,
+    "safety": null
+  },
+  "execution": {
+    "row_count": 0,
+    "execution_ms": 0,
+    "truncated": false,
+    "columns": []
+  },
+  "response": {
+    "summary": "The provided documents do not contain information about the growth of global music revenues in 2025 according to IFPI. The documents reference various aspects of the IFPI Global Music Report 2025, but they do not include specific data on revenue growth for that year. If you need detailed financial figures, you may need to consult the full IFPI Global Music Report 2025 Premium Edition or other financial summaries from IFPI.",
+    "key_insights": [
+      "Source: IFPI Global Music Report 2025 (IFPI, 2025)",
+      "Source: IFPI Global Music Report 2026 (IFPI, 2026)"
+    ]
+  },
+  "error": {
+    "message": null,
+    "stage": null
+  },
+  "trace": [
+    {
+      "node": "clarify",
+      "message": "Checking question: 'According to IFPI, how much did global music revenues grow in 2025?'",
+      "timestamp": 1782612865.649
+    },
+    {
+      "node": "clarify",
+      "message": "Question is clear \u2014 proceeding",
+      "timestamp": 1782612865.649
+    },
+    {
+      "node": "router",
+      "message": "Routing question: 'According to IFPI, how much did global music revenues grow in 2025?'",
+      "timestamp": 1782612865.65
+    },
+    {
+      "node": "router",
+      "message": "Route: RAG \u2014 The question asks for global music revenue growth in 2025, which is industry knowledge not found in the Chinook database.",
+      "timestamp": 1782612866.813
+    },
+    {
+      "node": "rag",
+      "message": "Searching documents: 'IFPI Global Music Report 2025'",
+      "timestamp": 1782612866.814
+    },
+    {
+      "node": "rag",
+      "message": "Retrieved 5 chunks from: ['IFPI Global Music Report 2025', 'IFPI Global Music Report 2026']",
+      "timestamp": 1782612867.668
+    },
+    {
+      "node": "format",
+      "message": "Formatting response (route=RAG)",
+      "timestamp": 1782612867.67
+    }
+  ]
+}

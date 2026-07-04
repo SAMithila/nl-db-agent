@@ -1,0 +1,81 @@
+{
+  "metadata": {
+    "timestamp": "2026-06-28T07:40:38.685556",
+    "question": "What did the IFPI report say about global music revenue in 2025?",
+    "user_id": "alice",
+    "success": false,
+    "had_error": false,
+    "retry_count": 0
+  },
+  "pipeline": {
+    "clarification_needed": false,
+    "schema_tables": [],
+    "generated_sql": null,
+    "sql_confidence": "",
+    "sql_explanation": "",
+    "sql_assumptions": "",
+    "validation_passed": false,
+    "guardrails_passed": false,
+    "execution_success": false
+  },
+  "validation": null,
+  "guardrails": {
+    "permissions": null,
+    "limits": null,
+    "safety": null
+  },
+  "execution": {
+    "row_count": 0,
+    "execution_ms": 0,
+    "truncated": false,
+    "columns": []
+  },
+  "response": {
+    "summary": "The IFPI Global Music Report 2026 states that global recorded music revenues reached an all-time high of US$31.7 billion in 2025. This marked the first time these revenues surpassed US$30 billion, with a growth rate of 6.4% in 2025, which was an improvement over the 4.7% growth rate in 2024 (Source 2: IFPI Global Music Report 2026, p.4).",
+    "key_insights": [
+      "Source: IFPI Global Music Report 2025 (IFPI, 2025)",
+      "Source: IFPI Global Music Report 2026 (IFPI, 2026)"
+    ]
+  },
+  "error": {
+    "message": null,
+    "stage": null
+  },
+  "trace": [
+    {
+      "node": "clarify",
+      "message": "Checking question: 'What did the IFPI report say about global music revenue in 2025?'",
+      "timestamp": 1782610834.109
+    },
+    {
+      "node": "clarify",
+      "message": "Question is clear \u2014 proceeding",
+      "timestamp": 1782610834.109
+    },
+    {
+      "node": "router",
+      "message": "Routing question: 'What did the IFPI report say about global music revenue in 2025?'",
+      "timestamp": 1782610834.109
+    },
+    {
+      "node": "router",
+      "message": "Route: RAG \u2014 The question asks for information from the IFPI Global Music Report, which is an external document.",
+      "timestamp": 1782610835.19
+    },
+    {
+      "node": "rag",
+      "message": "Searching documents: 'global music revenue in 2025 from the IFPI Global Music Report'",
+      "timestamp": 1782610835.191
+    },
+    {
+      "node": "rag",
+      "message": "Retrieved 5 chunks from: ['IFPI Global Music Report 2025', 'IFPI Global Music Report 2026']",
+      "timestamp": 1782610836.312
+    },
+    {
+      "node": "format",
+      "message": "Formatting response (route=RAG)",
+      "timestamp": 1782610836.313
+    }
+  ]
+}

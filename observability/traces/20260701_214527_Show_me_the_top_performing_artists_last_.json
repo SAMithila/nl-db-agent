@@ -1,0 +1,53 @@
+{
+  "metadata": {
+    "timestamp": "2026-07-01T21:45:27.153587",
+    "question": "Show me the top performing artists last quarter",
+    "user_id": "alice",
+    "success": false,
+    "had_error": false,
+    "retry_count": 0
+  },
+  "pipeline": {
+    "clarification_needed": true,
+    "schema_tables": [],
+    "generated_sql": null,
+    "sql_confidence": "",
+    "sql_explanation": "",
+    "sql_assumptions": "",
+    "validation_passed": false,
+    "guardrails_passed": false,
+    "execution_success": false
+  },
+  "validation": null,
+  "guardrails": {
+    "permissions": null,
+    "limits": null,
+    "safety": null
+  },
+  "execution": {
+    "row_count": 0,
+    "execution_ms": 0,
+    "truncated": false,
+    "columns": []
+  },
+  "response": {
+    "summary": "",
+    "key_insights": []
+  },
+  "error": {
+    "message": null,
+    "stage": null
+  },
+  "trace": [
+    {
+      "node": "clarify",
+      "message": "Checking question: 'Show me the top performing artists last quarter'",
+      "timestamp": 1782920725.213
+    },
+    {
+      "node": "clarify",
+      "message": "Ambiguity detected: ['time_period', 'metric']",
+      "timestamp": 1782920727.151
+    }
+  ]
+}

@@ -229,3 +229,29 @@ system works with any database.
 **Lesson:** Each route (SQL/RAG/BOTH) has different success
 signals. The API layer must check the final_response dict,
 not intermediate pipeline state flags.
+
+## Bug 10: LLM-as-judge false positives from insufficient context
+**Phase 7C** — Evaluation
+
+**Symptom:** Judge scored correct RAG answers as hallucinations.
+R001 answer "+4.8% growth" correctly cited from IFPI GMR 2025,
+but judge gave faithfulness=1 and hallucination=true.
+
+**Root cause:** rag_context passed to judge was truncated to 500
+characters. The +4.8% figure appeared in a chunk beyond that
+cutoff, so the judge couldn't verify the claim and assumed
+hallucination.
+
+**Fix:** Pass full rag_context (2000+ chars) to judge. In
+production, pass the complete retrieved chunks as separate
+messages in the judge prompt rather than concatenated text.
+
+**Production implications:**
+- False hallucination flags corrupt RLHF training signals
+- False positives in monitoring waste engineering time
+- Deployment gates based on flawed metrics block good answers
+
+**Lesson:** LLM-as-judge requires sufficient context to verify
+factual claims. Always validate judge calibration against
+human-labeled ground truth before using scores as training signal
+or deployment gates. 
