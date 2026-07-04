@@ -73,6 +73,12 @@ class QueryRequest(BaseModel):
     user_id:  str = "default_user"
     session_id: str = "default"
 
+class FeedbackRequest(BaseModel):
+    message_id: str
+    question:   str
+    route:      str
+    rating:     int        # 1 = thumbs up, -1 = thumbs down
+    session_id: str = "default"
 
 class QueryResponse(BaseModel):
     success:              bool
@@ -89,6 +95,9 @@ class QueryResponse(BaseModel):
     error:                Optional[str]    = None
     trace_summary:        Optional[list]   = None
     timestamp:            str              = ""
+    route:                Optional[str]    = None
+    sources:              Optional[list]   = None
+    route_reason:         Optional[str]    = None
 
 
 # ------------------------------------------------------------------
@@ -169,6 +178,7 @@ def query(request: QueryRequest):
             columns      = exec_res.get("columns", []),
             rows         = exec_res.get("rows", []),
             route        = final.get("route") or state.route,   # ADD
+            route_reason = state.route_reason,
             sources      = final.get("sources", []),             # ADD
             trace_summary = [
                 {"node": t["node"], "message": t["message"]}
@@ -239,6 +249,66 @@ def disconnect_database(session_id: str = "default"):
     """Disconnects a session from its database."""
     disconnect(session_id)
     return {"success": True, "message": "Disconnected"}
+
+@app.post("/feedback")
+def submit_feedback(request: FeedbackRequest):
+    """Stores user feedback for human baseline calibration."""
+    import json
+    from pathlib import Path
+    from datetime import datetime
+    
+    feedback_path = Path("observability/feedback.jsonl")
+    feedback_path.parent.mkdir(exist_ok=True)
+    
+    entry = {
+        "message_id": request.message_id,
+        "question":   request.question,
+        "route":      request.route,
+        "rating":     request.rating,
+        "session_id": request.session_id,
+        "timestamp":  datetime.now().isoformat(),
+    }
+    
+    with open(feedback_path, "a") as f:
+        f.write(json.dumps(entry) + "\n")
+    
+    return {"success": True, "message": "Feedback recorded"}
+
+@app.get("/feedback/summary")
+def feedback_summary():
+    """Returns aggregated feedback stats for evaluation dashboard."""
+    from pathlib import Path
+    
+    feedback_path = Path("observability/feedback.jsonl")
+    if not feedback_path.exists():
+        return {"total": 0, "thumbs_up": 0, "thumbs_down": 0, "by_route": {}}
+    
+    entries = []
+    with open(feedback_path) as f:
+        for line in f:
+            try: entries.append(json.loads(line))
+            except: pass
+    
+    thumbs_up   = sum(1 for e in entries if e.get("rating") == 1)
+    thumbs_down = sum(1 for e in entries if e.get("rating") == -1)
+    
+    by_route = {}
+    for e in entries:
+        route = e.get("route", "unknown")
+        if route not in by_route:
+            by_route[route] = {"thumbs_up": 0, "thumbs_down": 0}
+        if e.get("rating") == 1:
+            by_route[route]["thumbs_up"] += 1
+        else:
+            by_route[route]["thumbs_down"] += 1
+    
+    return {
+        "total":       len(entries),
+        "thumbs_up":   thumbs_up,
+        "thumbs_down": thumbs_down,
+        "satisfaction_rate": round(thumbs_up / len(entries) * 100, 1) if entries else 0,
+        "by_route":    by_route,
+    }
 
 @app.post("/connect/sqlite-upload")
 async def connect_sqlite_upload(
