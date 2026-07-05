@@ -255,3 +255,29 @@ messages in the judge prompt rather than concatenated text.
 factual claims. Always validate judge calibration against
 human-labeled ground truth before using scores as training signal
 or deployment gates. 
+
+## Bug 11: Router corrupted by accidental paste
+**Phase:** 7 — Agentic RAG
+
+**Symptom:** Every query returned "Route: SQL — Error — defaulting to SQL:
+name 'answer' is not defined" in the trace. All three routes fell back to SQL.
+
+**Root cause:** While adding "success": True to _format_rag_response() in
+graph.py, the return dict was accidentally pasted inside route_question() in
+router.py. The variable `answer` doesn't exist in router scope, causing a
+NameError on every routing call.
+
+**Fix:** Removed the corrupted 6-line block from router.py and restored the
+correct return dict:
+```python
+return {
+    "route":     Route(route_str),
+    "reason":    result.get("reason", ""),
+    "sql_focus": result.get("sql_focus"),
+    "rag_focus": result.get("rag_focus"),
+}
+```
+
+**Lesson:** When editing multiple files simultaneously, verify each file
+independently before committing. A grep for the variable name would have
+caught this instantly: `grep -n "answer" agent/router.py`
