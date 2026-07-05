@@ -164,13 +164,13 @@ Each answer scored on route-specific dimensions:
 ```
 nl-db-agent/
 ├── agent/
-│   ├── graph.py          # LangGraph state machine (7 nodes, 3 routes)
-│   ├── router.py         # LLM-based SQL/RAG/BOTH router with fast path
-│   ├── state.py          # AgentState schema with RAG fields
-│   └── run_agent.py      # CLI test runner
+│   ├── graph.py              # LangGraph state machine (7 nodes, 3 routes)
+│   ├── router.py             # LLM-based SQL/RAG/BOTH router with fast path
+│   ├── state.py              # AgentState schema with RAG fields
+│   └── run_agent.py          # CLI test runner
 ├── rag/
-│   ├── ingestion.py      # PDF → chunks → embeddings → Pinecone
-│   └── retriever.py      # Semantic search, top_k=5, min_score=0.3
+│   ├── ingestion.py          # PDF → chunks → embeddings → Pinecone
+│   └── retriever.py          # Semantic search, top_k=5, min_score=0.3
 ├── tools/
 │   ├── schema_inspector.py   # Schema retrieval + table keyword mapping
 │   ├── sql_generator.py      # GPT-4o-mini SQL generation
@@ -179,23 +179,23 @@ nl-db-agent/
 │   ├── clarifier.py          # Ambiguity detection
 │   └── formatter.py          # Response synthesis (SQL + RAG)
 ├── guardrails/
-│   ├── permissions.py    # Dynamic RBAC — column-based sensitivity
-│   ├── limits.py         # Rate limits + resource caps
-│   └── safety.py         # Injection + exfiltration detection
+│   ├── permissions.py        # Dynamic RBAC — column-based sensitivity
+│   ├── limits.py             # Rate limits + resource caps
+│   └── safety.py             # Injection + exfiltration detection
 ├── evaluation/
 │   ├── evaluation_dataset.json  # 36 benchmark queries (6 tiers)
 │   ├── llm_judge.py             # LLM-as-judge (SQL/RAG/BOTH prompts)
 │   ├── metrics.py               # Evaluation runner with --tier + --judge
 │   └── eval_results.json        # Latest benchmark results
 ├── observability/
-│   ├── tracer.py         # JSON trace logger
-│   └── feedback.jsonl    # Human feedback log (thumbs up/down)
+│   ├── tracer.py             # JSON trace logger
+│   └── feedback.jsonl        # Human feedback log (thumbs up/down)
 ├── api/
-│   └── main.py           # FastAPI: /query, /feedback, /feedback/summary
+│   └── main.py               # FastAPI: /query, /feedback, /feedback/summary
 ├── db/
-│   └── chinook.db        # Chinook SQLite (music store demo)
-├── documents/            # Source PDFs (local only — vectors in Pinecone)
-├── MISTAKES.md           # Phase-by-phase bug documentation
+│   └── chinook.db            # Chinook SQLite (music store demo)
+├── documents/                # Source PDFs (local only — vectors in Pinecone)
+├── MISTAKES.md               # Phase-by-phase bug documentation
 └── requirements.txt
 ```
 
