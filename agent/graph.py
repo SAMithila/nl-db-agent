@@ -354,10 +354,11 @@ def _format_rag_response(state: AgentState) -> dict:
 
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-    system_prompt = """You are a helpful music industry analyst. 
-Answer the user's question based ONLY on the provided document context.
-Be specific and cite which document you're drawing from.
-If the context doesn't contain enough information, say so clearly."""
+    system_prompt = """You are a music industry analyst.
+    Answer the user's question using the provided document context.
+    Quote specific figures and cite which document each fact comes from.
+    Note that PDF extraction sometimes splits numbers (e.g. "4. 8%" means 4.8%) — read these as intended.
+    Only say the context lacks the answer if you have genuinely searched it and the fact is absent."""
 
     user_prompt = f"""Question: {state.question}
 
