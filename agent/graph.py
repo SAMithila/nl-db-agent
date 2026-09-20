@@ -111,7 +111,7 @@ def rag_node(state: AgentState) -> AgentState:
     Uses rag_focus (from router) as the search query if available,
     otherwise falls back to the original question.
     """
-    search_query = state.rag_focus or state.question
+    search_query = f"{state.question} {state.rag_focus}".strip() if state.rag_focus else state.question
     state.add_trace("rag", f"Searching documents: '{search_query}'")
 
     try:
