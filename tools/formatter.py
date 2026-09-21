@@ -79,7 +79,7 @@ def format_response(
         return format_no_results(question)
 
     # Build data preview for LLM (max 10 rows)
-    preview_rows = rows[:10]
+    preview_rows = rows[:50]
     data_preview = _build_data_preview(columns, preview_rows)
 
     # Choose prompt based on whether RAG context is available

@@ -108,8 +108,7 @@ def router_node(state: AgentState) -> AgentState:
 def rag_node(state: AgentState) -> AgentState:
     """
     Retrieves relevant document chunks from Pinecone.
-    Uses rag_focus (from router) as the search query if available,
-    otherwise falls back to the original question.
+    Searches on the user's question, augmented with rag_focus from the router when available.
     """
     search_query = f"{state.question} {state.rag_focus}".strip() if state.rag_focus else state.question
     state.add_trace("rag", f"Searching documents: '{search_query}'")
