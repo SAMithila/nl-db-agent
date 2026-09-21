@@ -386,3 +386,35 @@ reads. It was fluent, specific, and false, with a real number attached.
 **Better fix (not yet done):** compute aggregates — max, min, totals — in
 Python and hand them to the model as facts. Arithmetic over a table should
 not be delegated to a language model.
+
+## Bug 17: Schema context omitted bridge tables; model invented a join
+
+**Symptom:** "Who are our top 5 artists by revenue?" — a sidebar example
+question — failed with `no such column: t.ArtistId`. The error shown to the
+user was generic: "Query execution failed". The real SQLite message was
+discarded.
+
+**Cause:** table selection is keyword-based. The question matched Artist,
+Invoice and InvoiceLine, but not Track or Album, which are the tables that
+connect them. With no bridge in context, the model guessed a direct
+Track→Artist join that doesn't exist in Chinook. The genre question had the
+same gap (Track missing) but worked because the model remembered Chinook's
+structure.
+
+**Fix:** after keyword matching, walk the foreign-key graph and add the
+tables on the shortest join path between those selected. Uses FK data
+already collected by `get_schema()`. Works on any database. Result: 10/10
+successful runs, down from failing.
+
+**What the eval missed:** the Hard tier reports 100%, but this question
+isn't in the evaluation set. The example questions a visitor is most likely
+to click should be in the benchmark.
+
+**Harness lesson:** an intermediate test re-executed the generated SQL
+itself instead of reading the agent's own success flag, and its results
+disagreed with the agent's. Measure the system's output, not a
+reconstruction of it.
+
+**Known limitation:** FK expansion only connects tables that keyword
+matching already chose. "Top selling products" still misses Track, because
+"product" matches no keyword. TABLE_KEYWORDS remains hardcoded to Chinook.
