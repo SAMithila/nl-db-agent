@@ -366,3 +366,23 @@ deploy status.
 
 **Lesson:** verify the deploy landed before re-testing in production. The
 trace timestamp and commit SHA should be the first thing checked, not the last.
+
+## Bug 16: Formatter summarised the first 10 rows as if they were all of them
+
+**Symptom:** "What is the total revenue by genre?" answered "Alternative & Punk
+generated the highest revenue at $241.56." The chart directly below showed Rock
+at $826.65. Data correct, chart correct, text wrong.
+
+**Cause:** `formatter.py` passed `rows[:10]` to the LLM. The generated SQL had
+GROUP BY but no ORDER BY, so rows returned alphabetically and Rock was row 18.
+The model saw 10 of 24 genres and reported the maximum of that subset as the
+overall maximum. Likely also the cause of "top 5 artists all at $1.98."
+
+**Fix:** preview up to 50 rows. The executor already caps results at 100.
+
+**Why it matters:** the only wrong thing on screen was the sentence the user
+reads. It was fluent, specific, and false, with a real number attached.
+
+**Better fix (not yet done):** compute aggregates — max, min, totals — in
+Python and hand them to the model as facts. Arithmetic over a table should
+not be delegated to a language model.
