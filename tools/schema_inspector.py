@@ -114,6 +114,45 @@ def get_schema(
 # ------------------------------------------------------------------
 # Tool 1B: search_schema()
 # ------------------------------------------------------------------
+def _add_join_path_tables(tables: set, session_id: str = "default") -> set:
+    """
+    Adds the intermediate tables needed to join the selected tables,
+    using foreign keys from the live schema. Works on any database.
+    """
+    from collections import deque
+
+    if len(tables) < 2:
+        return tables
+    schema_result = get_schema(session_id=session_id)
+    if not schema_result["success"]:
+        return tables
+    all_tables = schema_result["schema"]["tables"]
+
+    graph = {t: set() for t in all_tables}
+    for t, info in all_tables.items():
+        for fk in info.get("foreign_keys", []):
+            ref = fk.get("references_table")
+            if ref in graph:
+                graph[t].add(ref)
+                graph[ref].add(t)
+
+    def shortest_path(start, goal):
+        queue, seen = deque([[start]]), {start}
+        while queue:
+            path = queue.popleft()
+            if path[-1] == goal:
+                return path
+            for nxt in sorted(graph.get(path[-1], ())):
+                if nxt not in seen:
+                    seen.add(nxt)
+                    queue.append(path + [nxt])
+        return []
+
+    selected = sorted(t for t in tables if t in graph)
+    expanded = set(tables)
+    for t in selected[1:]:
+        expanded.update(shortest_path(selected[0], t))
+    return expanded
 
 def search_schema(question: str, session_id: str = "default") -> dict:
     """
@@ -160,6 +199,8 @@ def search_schema(question: str, session_id: str = "default") -> dict:
             all_tables = list(schema_result["schema"]["tables"].keys())
             # Return first 5 tables as default context
             relevant_tables = set(all_tables[:5])
+            
+    relevant_tables = _add_join_path_tables(relevant_tables, session_id)
 
     # Get schemas for relevant tables
     result = {}

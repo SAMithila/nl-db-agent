@@ -33,7 +33,7 @@ MODEL = "gpt-4o-mini"  # was "gpt-4o"
 # Tool 6A: format_response()
 # ------------------------------------------------------------------
 def _compute_facts(columns: list, rows: list) -> str:
-    """Exact aggregates computed in Python, so the LLM never does arithmetic."""
+    """Exact aggregates computed in Python, so the LLM never does arithmetic or ranking."""
     if not rows:
         return ""
     label_idx = next(
@@ -44,18 +44,22 @@ def _compute_facts(columns: list, rows: list) -> str:
 
     facts = []
     for i, col in enumerate(columns):
+        name = str(col)
+        if name.lower() == "id" or name.lower().endswith("_id") or name.endswith("Id"):
+            continue  # identifiers are numbers, not measures
         vals = [r[i] for r in rows]
         if not all(isinstance(v, (int, float)) for v in vals):
             continue
-        hi = max(range(len(rows)), key=lambda k: rows[k][i])
-        lo = min(range(len(rows)), key=lambda k: rows[k][i])
+        order = sorted(range(len(rows)), key=lambda k: rows[k][i], reverse=True)
+        ranked = ", ".join(f"{label(k)} ({rows[k][i]:,.2f})" for k in order[:3])
+        lo = order[-1]
         facts.append(
-            f"{col}: sum={sum(vals):,.2f}, "
-            f"highest={label(hi)} ({rows[hi][i]:,.2f}), "
-            f"lowest={label(lo)} ({rows[lo][i]:,.2f}), "
-            f"rows={len(rows)}"
+            f"{col}: sum={sum(vals):,.2f}; "
+            f"ranked highest first: {ranked}; "
+            f"lowest: {label(lo)} ({rows[lo][i]:,.2f}); rows={len(rows)}"
         )
     return "\n".join(facts)
+
 def format_response(
     question:         str,
     sql:              str,
