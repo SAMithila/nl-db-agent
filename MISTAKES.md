@@ -28,7 +28,7 @@ context — the LLM cannot infer view structure from the name alone
 
 
 ## Bug 2: SQLite file upload endpoint missing from deployment
-**DPhase 6** (Cloud Run Deployment)
+**Phase 6** (Cloud Run Deployment)
 
 **Symptom:** `/connect/sqlite-upload` returned 404 on Cloud Run despite
 working locally. Browser showed "Network Error" on file upload.
@@ -242,7 +242,7 @@ characters. The +4.8% figure appeared in a chunk beyond that
 cutoff, so the judge couldn't verify the claim and assumed
 hallucination.
 
-**Fix:** Pass full rag_context (2000+ chars) to judge. In
+**Fix:** Pass full rag_context (3000+ chars) to judge. In
 production, pass the complete retrieved chunks as separate
 messages in the judge prompt rather than concatenated text.
 
@@ -281,3 +281,88 @@ return {
 **Lesson:** When editing multiple files simultaneously, verify each file
 independently before committing. A grep for the variable name would have
 caught this instantly: `grep -n "answer" agent/router.py`
+
+## Bug 12: Router query rewriting silently degraded RAG retrieval
+
+**Symptom:** RAG-route questions returned "the documents do not specify..."
+even when the fact was in the corpus. Retrieval reported success and cited
+the correct source documents.
+
+**Cause:** `rag_node` used `search_query = state.rag_focus or state.question`.
+The router set `rag_focus` to a document title ("IFPI Global Music Report
+2025 & 2026"), so the embedding search ran against a title instead of the
+user's question. It returned report boilerplate; the answer chunk ranked
+outside top_k.
+
+**Why it was hard to find:** every layer downstream behaved correctly on
+the wrong input. Retrieval succeeded, sources were attached, no error was
+raised, and the model's refusal was the correct response to what it was
+given. I diagnosed it as context truncation, then as a context-passing bug
+on the RAG-only branch, then as prompt over-steering, before checking the
+trace line showing the actual embedding query.
+
+**Fix:** `search_query = f"{question} {rag_focus}".strip() if rag_focus
+else question`. The user's words lead; the router hint is additive.
+
+**Production implication:** any rewriting between user input and retrieval
+is a silent failure surface. Log the actual embedding query, not just the
+user's question — the trace line is what eventually identified this.
+
+---
+
+## Bug 13: Anti-hallucination prompt over-steered into refusal
+
+**Symptom:** even with correct context in the prompt, the RAG formatter
+declined to answer.
+
+**Cause:** the system prompt said "Answer based ONLY on the provided
+document context" and "If the context doesn't contain enough information,
+say so clearly." Together these bias toward refusal. Compounding it, PDF
+extraction split decimals ("4. 8%"), making the figure harder to recognise
+as an answer.
+
+**Fix:** removed "ONLY", noted the split-decimal artifact explicitly in the
+prompt, and made the refusal conditional ("only after genuinely searching").
+
+**Note:** this was a real improvement but it was fixing a symptom. The root
+cause was Bug 12.
+
+**Pairs with the LLM-judge truncation bug:** that one produced false
+positive hallucination flags; this one produced false negative answers.
+Both are grounding failures in opposite directions, and both are invisible
+in aggregate accuracy — the system looks like it is working.
+
+---
+
+## Bug 14: Cloud Run died silently when trial billing lapsed
+
+**Symptom:** the public demo returned "API connection failed". Discovered 77
+days after it broke.
+
+**Cause:** Google Cloud trial credits expired, billing account closed,
+Cloud Run refused to start the container. No application logs were produced
+because the container never ran — which made it look like a code fault.
+
+**Fix:** migrated the backend to Render (free tier, no card required).
+
+**Production implication:** a portfolio demo with no health check is a
+liability. The README advertised a link that had been dead for two and a
+half months. Next: `/health` endpoint plus a daily scheduled check.
+
+---
+
+## Bug 15: Malformed requirements.txt blocked deploys while I debugged
+against stale production code
+
+**Symptom:** fixes verified locally did not change production behaviour.
+
+**Cause:** `echo "python-multipart" >> requirements.txt` appended without a
+trailing newline, producing `pypdf==5.1.0python-multipart`. Every deploy
+failed at pip install in ~20s. Production stayed on the last good commit.
+
+**Why it wasted time:** the symptom (fix appears not to work) pointed at the
+fix, not at the pipeline. Two rounds of re-diagnosis before checking the
+deploy status.
+
+**Lesson:** verify the deploy landed before re-testing in production. The
+trace timestamp and commit SHA should be the first thing checked, not the last.

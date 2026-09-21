@@ -5,13 +5,14 @@
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
 ![LangGraph](https://img.shields.io/badge/LangGraph-0.2-green)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.110-teal)
-![Accuracy](https://img.shields.io/badge/Accuracy-86.1%25-brightgreen)
-![Hallucination](https://img.shields.io/badge/Hallucination-0%25_SQL-brightgreen)
+![Accuracy](https://img.shields.io/badge/Accuracy-31%2F36-brightgreen)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
 **Live Demo:** https://llm-sql-agent-ui.vercel.app
 
-**Live API:** https://nl-db-agent-140623834959.us-central1.run.app/docs
+**Live API:** https://nl-db-agent.onrender.com/docs
+
+> The backend runs on Render's free tier and sleeps when idle — the first request may take up to a minute to wake it.
 
 ---
 
@@ -27,7 +28,7 @@ This project routes both questions to the right source automatically.
 
 ## What It Does
 
-Ask any question in plain English. The agent decides whether to query the database, search industry documents, or combine both.
+Ask any question in plain English. The agent decides whether to query the database, search industry documents, or combine both. The examples below are actual outputs from the live deployment.
 
 ```
 SQL route:
@@ -36,13 +37,15 @@ SQL route:
 
 RAG route:
 "What is the global recorded music revenue growth rate?"
-→ +4.8% in 2024 (IFPI Global Music Report 2025, p.4)
+→ 4.8% in 2024, reaching US$29.6 billion (IFPI Global Music Report 2025).
+  In 2025 growth improved to 6.4%, reaching US$31.7 billion
+  (IFPI Global Music Report 2026).
 
 BOTH route:
 "How does our Rock revenue compare to global industry trends?"
-→ Our Chinook data shows Rock at $826.65. The IFPI 2026 report confirms
-  Rock maintains ~34% global market share, suggesting our catalog aligns
-  with industry demand.
+→ Our Rock revenue stands at $826.65. Globally, the IFPI reports 4.8%
+  revenue growth, with streaming accounting for 69% of global revenues.
+  Sources: IFPI 2025, IFPI 2026, Luminate 2025 Year-End Report.
 ```
 
 ---
@@ -102,6 +105,8 @@ Documents:
   - Luminate 2025 Year-End Report (156 vectors)
 ```
 
+The retrieval query is the user's question, with the router's focus hint appended as an additive term — never a replacement. See Bug 12 in `MISTAKES.md` for why.
+
 ### Human-Centered AI Features
 
 **Explainability Panel** — Every answer shows "Why this route?" revealing the agent's routing decision and reasoning. Users can verify whether the agent used their database, industry documents, or both.
@@ -116,8 +121,8 @@ Benchmarked against 36 queries across 6 tiers using deterministic checks + LLM-a
 
 ```
 Overall accuracy   : 86.1%  (31/36)
-SQL hallucination  : 0%
-Avg latency        : ~6,500ms (Bangladesh → US, GPT-4o-mini)
+SQL hallucination  : 0 of 22 SQL-tier queries
+Avg latency        : ~6,500ms (measured on the previous US deployment; re-measuring)
 LLM Judge avg      : SQL 3.8/5 · BOTH 2.9/5
 
 By Tier:
@@ -128,6 +133,8 @@ By Tier:
   BOTH           :  60%  ██████      (3/5)
   Clarification  :  67%  ██████      (2/3)
 ```
+
+At 36 queries the overall figure carries a wide confidence interval (roughly ±11 points at 95%). An expanded evaluation set is in progress.
 
 ### LLM-as-Judge Framework
 
@@ -153,7 +160,7 @@ Each answer scored on route-specific dimensions:
 | LLM — evaluation judge | GPT-4o |
 | Vector database | Pinecone (text-embedding-3-small) |
 | Demo database | Chinook SQLite (11 tables, music store) |
-| Backend API | FastAPI on Google Cloud Run |
+| Backend API | FastAPI in Docker on Render (Singapore) |
 | Frontend | Next.js on Vercel |
 | Observability | Custom JSON tracer + LLM-as-judge eval |
 
@@ -195,6 +202,7 @@ nl-db-agent/
 ├── db/
 │   └── chinook.db        # Chinook SQLite (music store demo)
 ├── documents/            # Source PDFs (local only — vectors in Pinecone)
+├── Dockerfile            # Reads host-assigned $PORT
 ├── MISTAKES.md           # Phase-by-phase bug documentation
 └── requirements.txt
 ```
@@ -270,22 +278,28 @@ LLM judges have known biases and calibration issues. Human thumbs up/down rating
 
 ## Real Bugs Caught
 
-See `MISTAKES.md` for full phase-by-phase documentation.
+See `MISTAKES.md` for full phase-by-phase documentation of all 15.
+
+**Bug: Router query rewriting silently degraded retrieval**
+The router replaced the user's question with a document title before embedding, so semantic search returned report boilerplate and the answer chunk fell outside top_k. Every downstream layer behaved correctly on the wrong input — retrieval succeeded, sources were cited, no error was raised. It took three wrong diagnoses before the trace line showing the actual embedding query identified it. Fix: search on the question, use the router hint as an additive term.
+
+**Bug: Anti-hallucination prompt over-steered into refusal**
+The RAG formatter declined to report a fact that was in its context, because "answer ONLY from context… if it doesn't contain enough information, say so" biased it toward refusal. Paired with the judge bug below, this gives two grounding failures in opposite directions — one false positive, one false negative — and both are invisible in aggregate accuracy.
 
 **Bug: LLM-as-judge false positives from truncated context**
 Judge scored correct RAG answers as hallucinations because `rag_context` was truncated to 500 chars — the cited fact appeared beyond the cutoff. Fix: pass 3,000+ chars. Production implication: truncated context corrupts RLHF training signals.
 
+**Bug: Demo died silently for 77 days**
+Cloud trial billing lapsed, the container stopped starting, and no alert fired. Migrated to Render. A health check and scheduled monitor are next.
+
 **Bug: RAG route returning `success: False`**
 `api/main.py` used `state.execution_success` to determine response success. For RAG-only routes, no SQL executes, so `execution_success` is always `False`. Fix: check `final_response.get("success")` instead.
-
-**Bug: Router corruption from paste error**
-Correct `_format_rag_response` code was accidentally pasted inside `route_question()` in `router.py`. The `answer` variable didn't exist in scope, causing a `NameError` on every routing call. Fix: remove corrupted block, restore correct return dict.
 
 ---
 
 ## About
 
-Built as part of a production-grade AI/ML portfolio
+Built as part of a production-grade AI/ML portfolio.
 
 **Portfolio:** github.com/SAMithila
 **Live demo:** https://llm-sql-agent-ui.vercel.app
