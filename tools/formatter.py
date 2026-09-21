@@ -32,7 +32,30 @@ MODEL = "gpt-4o-mini"  # was "gpt-4o"
 # ------------------------------------------------------------------
 # Tool 6A: format_response()
 # ------------------------------------------------------------------
+def _compute_facts(columns: list, rows: list) -> str:
+    """Exact aggregates computed in Python, so the LLM never does arithmetic."""
+    if not rows:
+        return ""
+    label_idx = next(
+        (j for j in range(len(columns)) if isinstance(rows[0][j], str)), None
+    )
+    def label(k):
+        return rows[k][label_idx] if label_idx is not None else f"row {k + 1}"
 
+    facts = []
+    for i, col in enumerate(columns):
+        vals = [r[i] for r in rows]
+        if not all(isinstance(v, (int, float)) for v in vals):
+            continue
+        hi = max(range(len(rows)), key=lambda k: rows[k][i])
+        lo = min(range(len(rows)), key=lambda k: rows[k][i])
+        facts.append(
+            f"{col}: sum={sum(vals):,.2f}, "
+            f"highest={label(hi)} ({rows[hi][i]:,.2f}), "
+            f"lowest={label(lo)} ({rows[lo][i]:,.2f}), "
+            f"rows={len(rows)}"
+        )
+    return "\n".join(facts)
 def format_response(
     question:         str,
     sql:              str,
@@ -81,6 +104,9 @@ def format_response(
     # Build data preview for LLM (max 10 rows)
     preview_rows = rows[:50]
     data_preview = _build_data_preview(columns, preview_rows)
+    facts = _compute_facts(columns, rows)
+    if facts:
+        data_preview += "\n\n=== COMPUTED FACTS (exact — use these numbers, never recalculate) ===\n" + facts
 
     # Choose prompt based on whether RAG context is available
     if rag_context:
