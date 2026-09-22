@@ -156,65 +156,64 @@ def _add_join_path_tables(tables: set, session_id: str = "default") -> set:
 
 def search_schema(question: str, session_id: str = "default") -> dict:
     """
-    Finds the most relevant tables for a natural language question.
-    Uses keyword matching against table names and column names.
-    Falls back to dynamic table discovery for unknown schemas.
+    Finds the tables relevant to a question in the connected database.
+
+    Small databases (<= SMALL_SCHEMA_LIMIT tables): every table is included.
+    Cheap, and removes any dependence on keyword guessing.
+    Larger databases: keyword matching restricted to tables that actually
+    exist, plus direct matches on table names, falling back to the first
+    tables, then expanded along foreign keys so the selection is joinable.
     """
+    SMALL_SCHEMA_LIMIT = 20
 
-    # Keyword → table mapping (Northwind defaults)
-    TABLE_KEYWORDS = {
-        "Artist":        ["artist", "band", "musician", "performer", "who made", "singer"],
-        "Album":         ["album", "record", "release", "collection", "disc"],
-        "Track":         ["track", "song", "music", "audio", "duration", "media", "price"],
-        "Genre":         ["genre", "type", "style", "category", "kind", "rock", "jazz", "latin", "metal", "blues"],
-        "Invoice":       ["invoice", "order", "purchase", "sale", "bought", "transaction", "revenue", "total", "billing"],
-        "InvoiceLine":   ["line item", "quantity", "unit price", "item", "revenue", "earning", "income"],
-        "Customer":      ["customer", "client", "buyer", "who bought", "contact", "email", "country", "city"],
-        "Employee":      ["employee", "staff", "rep", "manager", "reports to", "hire", "title"],
-        "Playlist":      ["playlist", "collection", "list", "queue"],
-        "PlaylistTrack": ["playlist track", "track in playlist", "song in list"],
-        "MediaType":     ["media", "format", "mp3", "aac", "wav", "file type"],
-    }
+    schema_result = get_schema(session_id=session_id)
+    if not schema_result["success"]:
+        return {"success": False, "error": schema_result.get("error")}
 
-    VIEW_KEYWORDS = {}
+    all_schemas = schema_result["schema"]["tables"]
+    live_tables = list(all_schemas.keys())
 
-    question_lower  = question.lower()
-    relevant_tables = set()
-    relevant_views  = set()
+    if len(live_tables) <= SMALL_SCHEMA_LIMIT:
+        relevant_tables = set(live_tables)
+    else:
+        TABLE_KEYWORDS = {
+            "Artist":        ["artist", "band", "musician", "performer", "who made", "singer"],
+            "Album":         ["album", "record", "release", "collection", "disc"],
+            "Track":         ["track", "song", "music", "audio", "duration", "media", "price"],
+            "Genre":         ["genre", "type", "style", "category", "kind", "rock", "jazz", "latin", "metal", "blues"],
+            "Invoice":       ["invoice", "order", "purchase", "sale", "bought", "transaction", "revenue", "total", "billing"],
+            "InvoiceLine":   ["line item", "quantity", "unit price", "item", "revenue", "earning", "income"],
+            "Customer":      ["customer", "client", "buyer", "who bought", "contact", "email", "country", "city"],
+            "Employee":      ["employee", "staff", "rep", "manager", "reports to", "hire", "title"],
+            "Playlist":      ["playlist", "collection", "list", "queue"],
+            "PlaylistTrack": ["playlist track", "track in playlist", "song in list"],
+            "MediaType":     ["media", "format", "mp3", "aac", "wav", "file type"],
+        }
+        question_lower = question.lower()
 
-    # First: try keyword matching
-    for table, keywords in TABLE_KEYWORDS.items():
-        if any(kw in question_lower for kw in keywords):
-            relevant_tables.add(table)
+        # Keyword hits, but only for tables that exist in this database
+        relevant_tables = {
+            t for t, kws in TABLE_KEYWORDS.items()
+            if t in all_schemas and any(kw in question_lower for kw in kws)
+        }
+        # Direct matches on the database's own table names ("orders", "reviews")
+        for t in live_tables:
+            if t.lower().rstrip("s") in question_lower:
+                relevant_tables.add(t)
 
-    for view, keywords in VIEW_KEYWORDS.items():
-        if any(kw in question_lower for kw in keywords):
-            relevant_views.add(view)
+        if not relevant_tables:
+            relevant_tables = set(live_tables[:5])
 
-    # If no keyword match: get all tables from the actual database
-    # This handles unknown schemas (user's own database)
-    if not relevant_tables:
-        schema_result = get_schema(session_id=session_id)
-        if schema_result["success"]:
-            all_tables = list(schema_result["schema"]["tables"].keys())
-            # Return first 5 tables as default context
-            relevant_tables = set(all_tables[:5])
-            
-    relevant_tables = _add_join_path_tables(relevant_tables, session_id)
+        relevant_tables = _add_join_path_tables(relevant_tables, session_id)
 
-    # Get schemas for relevant tables
-    result = {}
-    for table in relevant_tables:
-        table_schema = get_schema(table_name=table, session_id=session_id)
-        if table_schema["success"] and table in table_schema["schema"]["tables"]:
-            result[table] = table_schema["schema"]["tables"][table]
+    schemas = {t: all_schemas[t] for t in sorted(relevant_tables) if t in all_schemas}
 
     return {
         "success":         True,
         "question":        question,
-        "relevant_tables": list(relevant_tables),
-        "relevant_views":  list(relevant_views),
-        "schemas":         result,
+        "relevant_tables": sorted(relevant_tables),
+        "relevant_views":  [],
+        "schemas":         schemas,
     }
 
 

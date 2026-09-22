@@ -193,7 +193,8 @@ def connect(
 def get_active_engine(session_id: str = "default") -> Engine:
     """
     Returns the active engine for a session.
-    Falls back to default Northwind SQLite if no connection exists.
+        Returns the engine for a connected session. Demo mode ("default")
+    uses the Chinook database; an unknown named session raises LookupError.
 
     Args:
         session_id: Session identifier
@@ -204,6 +205,12 @@ def get_active_engine(session_id: str = "default") -> Engine:
     if session_id in _connections:
         return _connections[session_id]["engine"]
 
+    if session_id != "default":
+        raise LookupError(
+            f"No active database connection for session '{session_id}'. "
+            "It may have expired after a server restart — please reconnect."
+        )
+    
     # Fallback to default demo database
     return get_engine(DEFAULT_DB)
 

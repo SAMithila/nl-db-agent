@@ -143,7 +143,7 @@ def schema_node(state: AgentState) -> AgentState:
     """Retrieves relevant schema context for SQL generation."""
     state.add_trace("schema", "Retrieving relevant schema")
 
-    result = search_schema(state.question)
+    result = search_schema(state.question, session_id=state.session_id)
 
     if result["success"]:
         state.schema_context = result
@@ -198,7 +198,7 @@ def validate_node(state: AgentState) -> AgentState:
     """Validates the generated SQL."""
     state.add_trace("validate", "Validating SQL")
 
-    result = validate_sql(state.generated_sql)
+    result = validate_sql(state.generated_sql, session_id=state.session_id)
     state.validation_result = result
 
     if result["valid"]:
@@ -261,7 +261,7 @@ def execute_node(state: AgentState) -> AgentState:
     """Executes validated SQL against the database."""
     state.add_trace("execute", "Executing query")
 
-    result = execute_query(state.generated_sql)
+    result = execute_query(state.generated_sql, session_id=state.session_id)
     state.execution_result = result
 
     if result["success"]:

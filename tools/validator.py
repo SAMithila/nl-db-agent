@@ -8,16 +8,17 @@ This is the safety gate between SQL generation and database execution.
 
 The agent NEVER executes SQL that hasn't passed validation.
 
+Validation runs against the database connected for the current session,
+so user-uploaded databases are checked against their own schema — not the
+demo database.
+
 Functions:
-    validate_sql()       → syntax + safety + complexity check
+    validate_sql()       → safety + syntax + complexity check
     complexity_score()   → score a query's complexity (1-10)
 """
 
-import sqlite3
-import os
 import re
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "../db/chinook.db")
 
 # ------------------------------------------------------------------
 # Dangerous patterns — block these regardless of anything else
@@ -45,13 +46,14 @@ FORBIDDEN_PATTERNS = [
 # Tool 3A: validate_sql()
 # ------------------------------------------------------------------
 
-def validate_sql(sql: str) -> dict:
+def validate_sql(sql: str, session_id: str = "default") -> dict:
     """
     Validates a SQL query before execution.
     Runs 3 checks in order: safety → syntax → complexity.
 
     Args:
-        sql: The SQL query string to validate.
+        sql:        The SQL query string to validate.
+        session_id: Database session whose schema the query is checked against.
 
     Returns:
         dict with:
@@ -68,6 +70,7 @@ def validate_sql(sql: str) -> dict:
     checks = {}
 
     # ── Check 1: Safety ────────────────────────────────────────
+    # Must run first: EXPLAIN would accept DROP / DELETE as valid syntax.
     safety_result = _check_safety(sql)
     checks["safety"] = safety_result
     if not safety_result["passed"]:
@@ -78,7 +81,7 @@ def validate_sql(sql: str) -> dict:
         }
 
     # ── Check 2: Syntax ────────────────────────────────────────
-    syntax_result = _check_syntax(sql)
+    syntax_result = _check_syntax(sql, session_id)
     checks["syntax"] = syntax_result
     if not syntax_result["passed"]:
         return {
@@ -212,23 +215,25 @@ def _check_safety(sql: str) -> dict:
     return {"passed": True, "details": "All safety checks passed"}
 
 
-def _check_syntax(sql: str) -> dict:
+def _check_syntax(sql: str, session_id: str = "default") -> dict:
     """
-    Validate SQL syntax using SQLite's EXPLAIN.
-    SQLite parses but does not execute the query — safe and fast.
+    Validate SQL against the session's connected database using EXPLAIN.
+    The database parses and plans the query but does not execute it.
+    Works for SQLite, PostgreSQL and MySQL.
     """
     try:
-        conn = sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True)
-        cur  = conn.cursor()
-        cur.execute(f"EXPLAIN {sql}")   # Parse only, no execution
-        conn.close()
+        from db_connector import get_active_engine
+        engine = get_active_engine(session_id)
+        with engine.connect() as conn:
+            # exec_driver_sql sends SQL as-is, so ':' or '%' inside string
+            # literals are not misread as bind parameters.
+            conn.exec_driver_sql(f"EXPLAIN {sql}")
         return {"passed": True, "details": "Syntax is valid"}
 
-    except sqlite3.OperationalError as e:
-        return {"passed": False, "details": str(e)}
-
     except Exception as e:
-        return {"passed": False, "details": f"Unexpected error: {str(e)}"}
+        # Unwrap SQLAlchemy's wrapper to surface the database's own message,
+        # e.g. "no such column: t.ArtistId".
+        return {"passed": False, "details": str(getattr(e, "orig", e))}
 
 
 def _check_complexity(sql: str) -> dict:
@@ -251,46 +256,54 @@ def _check_complexity(sql: str) -> dict:
 
 
 # ------------------------------------------------------------------
-# Quick self-test
+# Quick self-test (runs against the default Chinook demo database)
 # ------------------------------------------------------------------
 
 if __name__ == "__main__":
+    import os
+    import sys
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
     test_cases = [
         # (description, sql, expected_valid)
         (
             "Valid simple query",
-            "SELECT * FROM customers LIMIT 10",
+            "SELECT * FROM Customer LIMIT 10",
             True,
         ),
         (
             "Valid join query",
-            """SELECT c.company_name, SUM(oi.unit_price * oi.quantity) as revenue
-               FROM customers c
-               JOIN orders o ON c.customer_id = o.customer_id
-               JOIN order_items oi ON o.order_id = oi.order_id
-               GROUP BY c.customer_id
+            """SELECT c.FirstName, SUM(il.UnitPrice * il.Quantity) AS revenue
+               FROM Customer c
+               JOIN Invoice i ON c.CustomerId = i.CustomerId
+               JOIN InvoiceLine il ON i.InvoiceId = il.InvoiceId
+               GROUP BY c.CustomerId
                ORDER BY revenue DESC LIMIT 5""",
             True,
         ),
         (
+            "Invalid column (the Bug 17 join)",
+            "SELECT a.Name FROM Artist a JOIN Track t ON a.ArtistId = t.ArtistId",
+            False,
+        ),
+        (
             "DANGEROUS: DELETE statement",
-            "DELETE FROM orders WHERE order_id = 1",
+            "DELETE FROM Invoice WHERE InvoiceId = 1",
             False,
         ),
         (
             "DANGEROUS: DROP table",
-            "DROP TABLE customers",
+            "DROP TABLE Customer",
             False,
         ),
         (
             "DANGEROUS: SQL injection attempt",
-            "SELECT * FROM orders; DROP TABLE orders--",
+            "SELECT * FROM Invoice; DROP TABLE Invoice--",
             False,
         ),
         (
             "Invalid syntax",
-            "SELECT * FORM customers",   # typo: FORM instead of FROM
+            "SELECT * FORM Customer",   # typo: FORM instead of FROM
             False,
         ),
     ]
