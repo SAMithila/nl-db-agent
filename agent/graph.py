@@ -90,7 +90,7 @@ def router_node(state: AgentState) -> AgentState:
     """
     state.add_trace("router", f"Routing question: '{state.question}'")
 
-    result = route_question(state.question)
+    result = route_question(state.question, session_id=state.session_id)
 
     state.route        = result["route"].value   # "SQL" | "RAG" | "BOTH"
     state.route_reason = result["reason"]

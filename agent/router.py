@@ -80,6 +80,59 @@ Decide the routing for this question."""
 
 
 # ------------------------------------------------------------------
+# Connected-database-aware prompt
+# ------------------------------------------------------------------
+# When a session has an explicit connection to the user's OWN database
+# (anything other than the demo Chinook fallback — see
+# db_connector.get_connection_info), the document corpus below is a
+# fixed demo library about the music industry and has no relationship
+# to that database. The default ROUTER_SYSTEM_PROMPT above assumes the
+# opposite (Chinook + music documents are always the two live sources),
+# so it must not be used once a real user database is connected —
+# otherwise any question the LLM doesn't recognize as Chinook-shaped
+# gets reasoned into RAG ("not available in the Chinook database"),
+# even though it's a normal question about the connected schema.
+
+CONNECTED_DB_ROUTER_PROMPT_TEMPLATE = """You are an intelligent query router for an AI agent that has access to two data sources:
+
+1. **SQL DATABASE (the user's own connected database — NOT Chinook)**
+   This session has an active connection to a database the user uploaded or connected themselves.
+   Its actual tables are:
+{schema_summary}
+   Good for: essentially all factual questions about this data — counts, totals, rankings,
+   lookups, listings, trends, anything that plausibly lives in the tables above. If a question
+   could reasonably be about this schema, even if it uses unfamiliar domain vocabulary, route it
+   to SQL. Do not require the question to resemble a music-store query — this database has
+   nothing to do with music.
+
+2. **DOCUMENT CORPUS (fixed demo library — Music Industry Reports)**
+   Documents: IFPI Global Music Report 2025 & 2026, Spotify Annual Report 20-F,
+   Luminate 2025 Year-End Music Report.
+   This corpus is FIXED and belongs to the product demo — it is unrelated to the user's
+   connected database. Only route to RAG or BOTH when the question explicitly asks about this
+   external document content by name or clear reference (e.g. mentions IFPI, Spotify, Luminate,
+   "global music industry", "streaming market", "according to the report").
+
+ROUTING RULES:
+- Default to SQL. The connected database is the user's own data — that is almost always what
+  "our"/"the" questions about counts, lists, or specific records refer to now, regardless of topic.
+- Only choose RAG if the question is clearly and only answerable from the fixed music-industry
+  documents, and could not be answered from the connected schema above.
+- Only choose BOTH if the question explicitly asks to combine data from the connected database
+  with the fixed music-industry documents.
+- When in doubt, choose SQL — do not route to RAG just because the question's subject matter
+  doesn't look like Chinook/music data. This database is intentionally not about music.
+
+Respond ONLY with valid JSON in this exact format:
+{{
+  "route": "SQL" | "RAG" | "BOTH",
+  "reason": "brief explanation of why",
+  "sql_focus": "what SQL should find (if applicable, else null)",
+  "rag_focus": "what documents should find (if applicable, else null)"
+}}"""
+
+
+# ------------------------------------------------------------------
 # Router function
 # ------------------------------------------------------------------
 
@@ -92,23 +145,82 @@ def _get_client():
     return _openai_client
 
 
-def route_question(question: str) -> dict:
-    # Fast path: obvious SQL questions skip LLM router
+def _is_custom_db_connected(session_id: str) -> bool:
+    """
+    True when this session has an explicit connection to a user database
+    (via /connect or /connect/sqlite-upload) — i.e. NOT the Chinook demo
+    fallback. Reuses db_connector's own connected-session bookkeeping
+    rather than inventing a second notion of "connected".
+    """
+    try:
+        from db_connector import get_connection_info
+        return bool(get_connection_info(session_id).get("connected", False))
+    except Exception:
+        return False
+
+
+def _connected_schema_summary(session_id: str, max_tables: int = 30) -> str:
+    """
+    Renders a short table/column summary of the connected database for
+    the router prompt, so the LLM sees the real schema instead of
+    reasoning in a vacuum about whether a question "fits Chinook".
+    """
+    try:
+        from tools.schema_inspector import get_schema
+        result = get_schema(session_id=session_id)
+        if not result["success"]:
+            return "   (schema unavailable)"
+
+        tables = result["schema"]["tables"]
+        lines = []
+        for name, info in list(tables.items())[:max_tables]:
+            cols = ", ".join(c["name"] for c in info["columns"])
+            lines.append(f"   - {name}({cols})")
+        if len(tables) > max_tables:
+            lines.append(f"   ... and {len(tables) - max_tables} more tables")
+        return "\n".join(lines) if lines else "   (no tables found)"
+    except Exception:
+        return "   (schema unavailable)"
+
+
+def route_question(question: str, session_id: str = "default") -> dict:
     q = question.lower()
     sql_signals = ["how many", "count", "total", "list all", "show me all", "average"]
-    rag_signals = ["ifpi", "spotify", "report", "industry", "global", "worldwide", "according to"]
-    
-    if any(s in q for s in rag_signals):
-        pass  # needs LLM router
-    elif any(s in q for s in sql_signals) and not any(s in q for s in ["compare", "trend", "industry"]):
-        # Fast SQL route — no LLM call needed
-        return {
-            "route":     Route.SQL,
-            "reason":    "Fast path: clear SQL question",
-            "sql_focus": question,
-            "rag_focus": None,
-        }
-    
+    rag_signals = ["ifpi", "spotify", "luminate", "report", "industry", "global", "worldwide", "according to"]
+
+    db_connected = _is_custom_db_connected(session_id)
+
+    if db_connected:
+        # A real user database is active. The fixed music-document corpus
+        # is unrelated to it, so only fall through to the (schema-aware)
+        # LLM router when the question explicitly names that corpus —
+        # everything else is answered from the connected schema without
+        # a model call at all.
+        if not any(s in q for s in rag_signals):
+            return {
+                "route":     Route.SQL,
+                "reason":    "Fast path: user database connected — routing to SQL",
+                "sql_focus": question,
+                "rag_focus": None,
+            }
+        system_prompt = CONNECTED_DB_ROUTER_PROMPT_TEMPLATE.format(
+            schema_summary=_connected_schema_summary(session_id)
+        )
+    else:
+        # Demo mode (Chinook, no user database connected) — unchanged
+        # behavior from before this fix.
+        if any(s in q for s in rag_signals):
+            pass  # needs LLM router
+        elif any(s in q for s in sql_signals) and not any(s in q for s in ["compare", "trend", "industry"]):
+            # Fast SQL route — no LLM call needed
+            return {
+                "route":     Route.SQL,
+                "reason":    "Fast path: clear SQL question",
+                "sql_focus": question,
+                "rag_focus": None,
+            }
+        system_prompt = ROUTER_SYSTEM_PROMPT
+
     # Slow path: ambiguous questions need LLM router
     client = _get_client()
 
@@ -116,7 +228,7 @@ def route_question(question: str) -> dict:
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": ROUTER_SYSTEM_PROMPT},
+                {"role": "system", "content": system_prompt},
                 {"role": "user",   "content": ROUTER_USER_TEMPLATE.format(question=question)},
             ],
             temperature=0,        # deterministic routing
