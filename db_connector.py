@@ -193,8 +193,19 @@ def connect(
 def get_active_engine(session_id: str = "default") -> Engine:
     """
     Returns the active engine for a session.
-        Returns the engine for a connected session. Demo mode ("default")
-    uses the Chinook database; an unknown named session raises LookupError.
+
+    A session that has an explicit connection (via /connect or
+    /connect/sqlite-upload) uses that engine — this is how an uploaded
+    database gets used for schema, validation and execution instead of
+    silently being ignored.
+
+    Any other session_id — including "default", a freshly generated
+    per-visitor id that has never called /connect, or one whose
+    connection was lost (e.g. after a server restart) — falls back to
+    the Chinook demo database. This is what makes "the app shows one
+    working demo on open" true without requiring an explicit connect
+    call, regardless of what session_id value the frontend happens to
+    send for a visitor who hasn't uploaded anything.
 
     Args:
         session_id: Session identifier
@@ -205,13 +216,10 @@ def get_active_engine(session_id: str = "default") -> Engine:
     if session_id in _connections:
         return _connections[session_id]["engine"]
 
-    if session_id != "default":
-        raise LookupError(
-            f"No active database connection for session '{session_id}'. "
-            "It may have expired after a server restart — please reconnect."
-        )
-    
-    # Fallback to default demo database
+    # No active connection for this session — use the demo database.
+    # (Previously this only applied to the literal string "default",
+    # which broke the demo for any other session_id the frontend sent
+    # that had never been explicitly connected — see MISTAKES.md.)
     return get_engine(DEFAULT_DB)
 
 
