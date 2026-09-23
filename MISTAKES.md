@@ -22,8 +22,9 @@ why, how it was fixed, and what it taught. Ordered by when each was found.
 | 15 | Malformed `requirements.txt` blocked deploys | 8 |
 | 16 | Formatter summarised a subset and did its own arithmetic | 8 |
 | 17 | Schema context omitted bridge tables; model invented a join | 8 |
+| 18 | Session fallback only covered the literal string "default" | 8 |
 
-The patterns across all seventeen are summarised at the end.
+The patterns across all eighteen are summarised at the end.
 
 ---
 
@@ -501,6 +502,64 @@ with the agent's. Measure the system's output, not a reconstruction of it.
 - `TABLE_KEYWORDS` remains hardcoded to Chinook (see Bug 8).
 - Execution errors still surface to users as a generic message. The real
   error should be logged, and should feed the retry loop.
+
+---
+
+## Bug 18: Session fallback only covered the literal string "default"
+**Phase 8** — Production revival
+
+**Symptom:** every SQL question failed in production with a generic
+"Something went wrong" error. RAG questions kept working. The demo had never
+been connected to by any visitor before asking a question, so this hit every
+real user, not an edge case.
+
+**Root cause:** two changes landed in the same commit and each was correct in
+isolation, but together they broke the default demo path. `agent/graph.py`
+was fixed to thread the real `state.session_id` through `schema_node`,
+`validate_node`, and `execute_node` instead of silently defaulting every
+stage to the literal string `"default"` — a real bug, since it meant an
+uploaded database was previously being ignored and every query secretly ran
+against Chinook regardless of session. In the same commit,
+`db_connector.get_active_engine()` was rewritten so that only a session_id
+equal to the literal string `"default"` fell back to the demo database;
+any other unconnected session_id raised `LookupError`. Before that commit,
+the fallback applied to any session with no active connection. Once the
+session-threading fix made the real per-visitor session_id reach
+`get_active_engine()`, every demo visitor — whose session_id is never
+literally `"default"` — hit the `LookupError` branch on every SQL question.
+The exception was caught by `get_schema()`'s generic `except Exception`,
+converted to `"Something went wrong..."` by `formatter.format_error()`, and
+the real error was discarded before reaching a response or a log. RAG was
+unaffected because `rag_node` never calls `db_connector`.
+
+**Fix:** restored the fallback in `get_active_engine()` to apply to *any*
+session_id without an active entry in `_connections`, not just the literal
+string `"default"`. A session with an explicit connection (via `/connect`)
+still uses its own engine — the genuine improvement from the session-threading
+fix stays intact. This keys the fallback on "does this session have an active
+connection," matching the contract `get_connection_info()` already assumed
+elsewhere, rather than on a specific string.
+
+Separately, this closed part of Bug 17's known limitation: the real error was
+being silently discarded (caught, stringified, dropped) with nothing recorded
+anywhere. `api/main.py` now logs the real exception server-side
+(`logger.error`) on every query failure, including the outer unhandled-
+exception handler, which was previously also leaking `str(e)` straight into
+the client-visible HTTP response — that leak was closed too, so the client
+only ever sees the existing friendly message while the real error is always
+recoverable from server logs.
+
+**Lesson:** two individually-correct changes in the same commit can compose
+into a regression that neither change's own tests would catch, because each
+one only tested the case it was designed to fix (a literal `"default"`
+session parity check, and an uploaded-database routing check) — neither
+tested an unconnected non-"default" session, which is the actual shape of a
+first-time demo visitor. Test the state a real user starts in, not just the
+states a fix was written to handle. Also: an `except Exception: return
+{"success": False, "error": str(e)}` at a component boundary will keep
+converting real, actionable errors into generic ones for anyone who doesn't
+already know to grep for it — errors caught at a boundary need a log
+statement at the point they're caught, not just at first discovery.
 
 ---
 
