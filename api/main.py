@@ -25,6 +25,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 load_dotenv(Path(__file__).parent.parent / ".env")
 
+import logging
 from fastapi import FastAPI, HTTPException, Header, UploadFile, File, Form
 import tempfile, shutil, sqlite3
 from fastapi.middleware.cors import CORSMiddleware
@@ -32,6 +33,8 @@ from pydantic import BaseModel
 from typing import Optional
 import time
 from datetime import datetime
+
+logger = logging.getLogger(__name__)
 
 from agent.graph              import run_query
 from observability.tracer     import save_trace, list_traces, get_metrics_summary
@@ -159,6 +162,11 @@ def query(request: QueryRequest):
 
         # Error case
         if not is_success:
+            technical_error = final.get("technical") or state.error or "Unknown error"
+            logger.error(
+                "Query failed [session=%s stage=%s]: %s",
+                request.session_id, final.get("stage") or state.error_stage, technical_error,
+            )
             return QueryResponse(
                 success   = False,
                 question  = request.question,
@@ -189,7 +197,11 @@ def query(request: QueryRequest):
         
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error("Query failed [session=%s]: %s", request.session_id, str(e))
+        raise HTTPException(
+            status_code=500,
+            detail="Something went wrong. Please try rephrasing your question.",
+        )
 
 
 @app.get("/schema")
