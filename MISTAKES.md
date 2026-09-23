@@ -23,8 +23,9 @@ why, how it was fixed, and what it taught. Ordered by when each was found.
 | 16 | Formatter summarised a subset and did its own arithmetic | 8 |
 | 17 | Schema context omitted bridge tables; model invented a join | 8 |
 | 18 | Session fallback only covered the literal string "default" | 8 |
+| 19 | Router defaulted to RAG once a connected DB stopped looking like Chinook | 8 |
 
-The patterns across all eighteen are summarised at the end.
+The patterns across all nineteen are summarised at the end.
 
 ---
 
@@ -563,6 +564,51 @@ statement at the point they're caught, not just at first discovery.
 
 ---
 
+## Bug 19: Router defaulted to RAG once a connected DB stopped looking like Chinook
+**Phase 8** — Production revival
+
+**Symptom:** with a user's own database connected (tested with a World Cup
+dataset — `host_cities`, `matches`, `teams`, `tournament_stages`, no relation
+to music), a plain factual question about a table that exists in that
+database ("host cities?", "Show the geolocation data" against
+`db/ecommerce.db`) routed to RAG. RAG searched the demo's fixed IFPI/Spotify/
+Luminate PDFs, found nothing relevant, and returned a failure — even though
+the answer was one `SELECT` away in the connected schema.
+
+**Root cause:** `route_question()` took no `session_id` and had no way to
+know a non-demo database was connected. Its LLM system prompt hardcoded
+"SQL DATABASE (Chinook Music Store)" with Chinook's own table list and
+described the document corpus as the other fixed, always-relevant source.
+Once a connected table or question didn't resemble Chinook, the model made a
+locally correct inference under a false premise — "not available in the
+Chinook database" — and fell through to RAG by elimination. This wasn't a
+crash or a swallowed exception like most bugs here; it was a well-reasoned
+wrong answer, because nothing in the prompt told the model the SQL source
+had changed out from under it.
+
+**Fix:** `route_question()` now accepts `session_id` and checks
+`db_connector.get_connection_info()` — the same connected/not-connected
+signal Bug 18's fix relies on, not a new one. When a custom database is
+connected, routing fast-paths to SQL unless the question names the fixed
+document corpus explicitly (IFPI/Spotify/Luminate/"global music industry");
+if it does, the LLM router runs against a prompt built from the *connected*
+database's live schema (via the same `get_schema()` used by Bug 17's FK-path
+fix) instead of Chinook. A session with no `/connect` call takes the exact
+same code path as before this change — demo-mode routing is untouched.
+
+**Lesson:** a router (or any component) tuned against one fixed domain will
+silently keep reasoning as if that domain is still true once the environment
+changes underneath it — "not found in X" is a valid inference right up until
+X is no longer the only place to look, and nothing forces the model to
+notice. Any prompt that hardcodes a specific schema/corpus needs the same
+connection-awareness the rest of the pipeline already has, not just the
+components that touch the database directly. Same root shape as Bug 8/17
+(hardcoded assumptions break on database switch), but distinct in outcome:
+those were malformed SQL or a crash; this was a confidently wrong choice with
+no error to notice at all.
+
+---
+
 ## Patterns
 
 **Silent failures at the handoffs (Bugs 11, 12, 13, 16, 17).** The most
@@ -575,9 +621,10 @@ inputs are what found them.
 **Stale deployments (Bugs 2, 5, 15).** Three times, the code being tested was
 not the code running. Check what's deployed before diagnosing what's broken.
 
-**Hardcoded assumptions (Bugs 8, 17).** Each database switch exposed
-assumptions baked into lists. Reading structure from the live schema holds up;
-hand-maintained keyword lists don't.
+**Hardcoded assumptions (Bugs 8, 17, 19).** Each database switch exposed
+assumptions baked into lists or prompts. Reading structure from the live
+schema holds up; hand-maintained keyword lists and prompts describing one
+fixed domain don't.
 
 **Evaluation blind spots (Bugs 10, 17).** The judge was miscalibrated and the
 benchmark missed a question on the demo's own front page. An evaluation is
