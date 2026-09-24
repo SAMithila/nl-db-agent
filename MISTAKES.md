@@ -406,9 +406,14 @@ fault rather than an account problem.
 Rotated API keys, moved them to the host's secret store, and added a spend cap.
 
 **Lesson:** A demo without a health check is a liability. The README
-advertised a link that had been dead for two and a half months. Next: a
-`/health` endpoint that checks OpenAI, Pinecone and the database, plus a
-scheduled daily check that alerts on failure.
+advertised a link that had been dead for two and a half months.
+
+**Resolved:** `/health` now actually checks OpenAI (`models.list()`),
+Pinecone (`describe_index_stats()` on the live index), and the default
+Chinook database (`test_connection`), returning 503 naming which check(s)
+failed instead of always returning 200. A GitHub Action
+(`.github/workflows/health-check.yml`) curls it once a day and fails the
+workflow — which notifies via GitHub — on any non-200 response.
 
 ---
 
