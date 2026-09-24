@@ -1,0 +1,28 @@
+name: Health Check
+
+on:
+  schedule:
+    - cron: "0 6 * * *"  # once a day, 06:00 UTC
+  workflow_dispatch: {}
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Curl /health
+        run: |
+          URL="https://nl-db-agent.onrender.com/health"
+          # Render's free tier sleeps when idle, so the first request can
+          # take a while to wake the container — retry once before failing.
+          for attempt in 1 2; do
+            status=$(curl -s -o response.json -w "%{http_code}" --max-time 60 "$URL")
+            echo "Attempt $attempt: HTTP $status"
+            cat response.json
+            echo
+            if [ "$status" = "200" ]; then
+              exit 0
+            fi
+            sleep 30
+          done
+          echo "Health check failed after 2 attempts"
+          exit 1

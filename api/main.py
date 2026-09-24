@@ -36,11 +36,15 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
+from openai import OpenAI
+from pinecone import Pinecone
+
 from agent.graph              import run_query
 from observability.tracer     import save_trace, list_traces, get_metrics_summary
 from tools.schema_inspector   import get_schema
 from evaluation.metrics       import load_results
-from db_connector             import connect, get_connection_info, disconnect, test_connection
+from db_connector              import connect, get_connection_info, disconnect, test_connection, DEFAULT_DB
+from rag.retriever             import INDEX_NAME as RAG_INDEX_NAME
 
 
 # ------------------------------------------------------------------
@@ -109,12 +113,45 @@ class QueryResponse(BaseModel):
 
 @app.get("/health")
 def health_check():
-    """Health check endpoint for AWS load balancer."""
-    return {
-        "status":    "healthy",
+    """
+    Health check — verifies OpenAI, Pinecone, and the default (Chinook)
+    database are all reachable. 200 if every check passes, 503 naming
+    which check(s) failed otherwise. See MISTAKES.md Bug 14: a demo
+    without this was down for 77 days before anyone noticed.
+    """
+    checks = {}
+
+    try:
+        OpenAI(api_key=os.getenv("OPENAI_API_KEY")).models.list()
+        checks["openai"] = True
+    except Exception as e:
+        logger.error("Health check failed [openai]: %s", e)
+        checks["openai"] = False
+
+    try:
+        Pinecone(api_key=os.getenv("PINECONE_API_KEY")).Index(RAG_INDEX_NAME).describe_index_stats()
+        checks["pinecone"] = True
+    except Exception as e:
+        logger.error("Health check failed [pinecone]: %s", e)
+        checks["pinecone"] = False
+
+    db_result = test_connection(DEFAULT_DB)
+    checks["database"] = db_result["success"]
+    if not db_result["success"]:
+        logger.error("Health check failed [database]: %s", db_result.get("error"))
+
+    healthy = all(checks.values())
+    body = {
+        "status":    "healthy" if healthy else "unhealthy",
         "timestamp": datetime.now().isoformat(),
-        "version":   "1.0.0",
+        "checks":    checks,
     }
+
+    if not healthy:
+        body["failed"] = [name for name, ok in checks.items() if not ok]
+        raise HTTPException(status_code=503, detail=body)
+
+    return body
 
 
 @app.post("/query", response_model=QueryResponse)
