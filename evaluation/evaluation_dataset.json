@@ -252,7 +252,7 @@
         "id": "R001b",
         "tier": "rag",
         "route": "RAG",
-        "question": "What did the IFPI Global Music Report 2026 say about total revenue?",
+        "question": "What growth did the IFPI report in recorded music revenues?",
         "expected_row_count": null,
         "expected_columns": null,
         "expected_value": null,
