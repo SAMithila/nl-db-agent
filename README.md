@@ -284,7 +284,7 @@ LLM judges have known biases and calibration issues. Human thumbs up/down rating
 
 ## Real Bugs Caught
 
-See `MISTAKES.md` for full phase-by-phase documentation of all 15.
+See `MISTAKES.md` for full phase-by-phase documentation of all 19.
 
 **Bug: Router query rewriting silently degraded retrieval**
 The router replaced the user's question with a document title before embedding, so semantic search returned report boilerplate and the answer chunk fell outside top_k. Every downstream layer behaved correctly on the wrong input — retrieval succeeded, sources were cited, no error was raised. It took three wrong diagnoses before the trace line showing the actual embedding query identified it. Fix: search on the question, use the router hint as an additive term.
