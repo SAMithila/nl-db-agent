@@ -12,6 +12,8 @@
 
 **Live API:** https://nl-db-agent.onrender.com/docs
 
+**Health check:** https://nl-db-agent.onrender.com/health — verifies OpenAI, Pinecone, and the database are reachable; checked automatically once a day by [`.github/workflows/health-check.yml`](.github/workflows/health-check.yml), which fails (and notifies via GitHub) on any non-200 response.
+
 > The backend runs on Render's free tier and sleeps when idle — the first request may take up to a minute to wake it.
 
 ---
@@ -163,6 +165,7 @@ Each answer scored on route-specific dimensions:
 | Backend API | FastAPI in Docker on Render (Singapore) |
 | Frontend | Next.js on Vercel |
 | Observability | Custom JSON tracer + LLM-as-judge eval |
+| Monitoring | `/health` endpoint + daily GitHub Action check |
 
 ---
 
@@ -198,10 +201,13 @@ nl-db-agent/
 │   ├── tracer.py         # JSON trace logger
 │   └── feedback.jsonl    # Human feedback log (thumbs up/down)
 ├── api/
-│   └── main.py           # FastAPI: /query, /feedback, /feedback/summary
+│   └── main.py           # FastAPI: /query, /health, /feedback, /feedback/summary
 ├── db/
 │   └── chinook.db        # Chinook SQLite (music store demo)
 ├── documents/            # Source PDFs (local only — vectors in Pinecone)
+├── .github/
+│   └── workflows/
+│       └── health-check.yml  # Daily cron: curls /health, fails on non-200
 ├── Dockerfile            # Reads host-assigned $PORT
 ├── MISTAKES.md           # Phase-by-phase bug documentation
 └── requirements.txt
@@ -290,7 +296,7 @@ The RAG formatter declined to report a fact that was in its context, because "an
 Judge scored correct RAG answers as hallucinations because `rag_context` was truncated to 500 chars — the cited fact appeared beyond the cutoff. Fix: pass 3,000+ chars. Production implication: truncated context corrupts RLHF training signals.
 
 **Bug: Demo died silently for 77 days**
-Cloud trial billing lapsed, the container stopped starting, and no alert fired. Migrated to Render. A health check and scheduled monitor are next.
+Cloud trial billing lapsed, the container stopped starting, and no alert fired. Migrated to Render, and added a real `/health` check (OpenAI, Pinecone, database) plus a daily GitHub Action that fails the workflow on any non-200 response.
 
 **Bug: RAG route returning `success: False`**
 `api/main.py` used `state.execution_success` to determine response success. For RAG-only routes, no SQL executes, so `execution_success` is always `False`. Fix: check `final_response.get("success")` instead.
